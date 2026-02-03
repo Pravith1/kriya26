@@ -1,4 +1,5 @@
-"use client"
+"use client";
+import Image from "next/image";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/all";
@@ -77,7 +78,7 @@ const Hero = () => {
         className="relative z-10 h-dvh w-full overflow-hidden rounded-lg bg-blue-75"
       >
         <div>
-          <div className="mask-clip-path absolute-center absolute z-50 size-64 cursor-pointer overflow-hidden rounded-lg">
+          {/* <div className="mask-clip-path absolute-center absolute z-50 size-64 cursor-pointer overflow-hidden rounded-lg">
             <VideoPreview>
               <div
                 onClick={handleMiniVdClick}
@@ -93,7 +94,7 @@ const Hero = () => {
                 />
               </div>
             </VideoPreview>
-          </div>
+          </div> */}
 
           <video
             ref={nextVdRef}
@@ -113,33 +114,50 @@ const Hero = () => {
             className="absolute left-0 top-0 size-full object-cover object-center"
           />
         </div>
+        <div className="absolute left-0 top-0 z-10 size-full bg-black/30" />
+        <div className="absolute top-10 left-10 z-50">
+          <Image
+            src="/Logo/kriya26white.png"
+            alt="Kriya 2026 Logo"
+            width={160}
+            height={80}
+            className="h-20 w-auto opacity-90"
+          />
+
+        </div>
 
         <h1 className="special-font hero-heading absolute bottom-5 right-5 z-40 text-[#dfdff2]">
-          K<b>R</b>IYA
+          Kri<b>y</b>a
         </h1>
 
-        <div className="absolute left-0 top-0 z-40 size-full">
-          <div className="mt-24 px-5 sm:px-10">
-            <h1 className="special-font hero-heading text-[#dfdff2]">
-              Kri<b>y</b>a
-            </h1>
-
-            <p className="mb-5 max-w-64 font-robert-regular text-[#dfdff2]">
-              Enter the Events page <br /> Unleash the Play Economy
-            </p>
-
+        <div className="absolute-center z-20 w-full text-center font-general">
+          <h1 className="special-font hero-heading !text-6xl !md:text-6xl text-[#dfdff2] mb-4">
+            the gl<b>o</b>bal cl<b>a</b>sh <b>o</b>f
+          </h1>
+          <h2 className="special-font hero-heading !text-6xl !md:text-7xl bg-gradient-to-r from-violet-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent mb-6">
+            te<b>c</b>h<b>n</b>o t<b>a</b>lents
+          </h2>
+          <p className="mb-8 font-robert-regular text-lg tracking-wide text-white/70 md:text-xl">
+            MARCH 13-15, 2026 | PSG TECH, COIMBATORE
+          </p>
+          <div className="flex-center mt-4 gap-4">
             <Button
-              id="explore"
-              title="Explore Events"
-              leftIcon={<TiLocationArrow />}
+              title="REGISTER NOW"
               containerClass="bg-yellow-300 flex-center gap-1"
+              leftIcon={<TiLocationArrow />}
+            />
+            <Button
+              title="EXPLORE EVENTS"
+              containerClass="border flex flex-row gap-2 border-white/30 bg-transparent"
+              leftIcon={<TiLocationArrow />}
             />
           </div>
         </div>
+
       </div>
 
       <h1 className="special-font hero-heading absolute bottom-5 right-5 text-black">
-        K<b>R</b>IYA
+        Kri<b>y</b>a
       </h1>
     </div>
   );
