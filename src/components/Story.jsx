@@ -211,13 +211,7 @@ const FloatingImage = () => {
             <button
               onClick={prevSlide}
               disabled={isAnimating}
-              className="absolute left-4 md:left-8 lg:left-16 top-1/2 -translate-y-1/2 z-40
-                         w-14 h-14 rounded-full bg-white/10 backdrop-blur-md
-                         hidden md:flex items-center justify-center text-white
-                         border border-white/20
-                         hover:bg-white/20 hover:scale-110
-                         transition-all duration-300 cursor-pointer
-                         disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
+              className="absolute left-4 md:left-8 lg:left-16 top-1/2 -translate-y-1/2 z-40 w-14 h-14 rounded-full bg-white/10 backdrop-blur-md hidden md:flex items-center justify-center text-white border border-white/20 hover:bg-white/20 hover:scale-110 transition-all duration-300 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
               aria-label="Previous slide"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -228,13 +222,7 @@ const FloatingImage = () => {
             <button
               onClick={nextSlide}
               disabled={isAnimating}
-              className="absolute right-4 md:right-8 lg:right-16 top-1/2 -translate-y-1/2 z-40
-                         w-14 h-14 rounded-full bg-white/10 backdrop-blur-md
-                         hidden md:flex items-center justify-center text-white
-                         border border-white/20
-                         hover:bg-white/20 hover:scale-110
-                         transition-all duration-300 cursor-pointer
-                         disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
+              className="absolute right-4 md:right-8 lg:right-16 top-1/2 -translate-y-1/2 z-40 w-14 h-14 rounded-full bg-white/10 backdrop-blur-md hidden md:flex items-center justify-center text-white border border-white/20 hover:bg-white/20 hover:scale-110 transition-all duration-300 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
               aria-label="Next slide"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -250,10 +238,7 @@ const FloatingImage = () => {
                 key={index}
                 onClick={() => !isAnimating && setCurrentIndex(index)}
                 disabled={isAnimating}
-                className={`h-2 rounded-full transition-all duration-300 cursor-pointer
-                  ${index === currentIndex
-                    ? 'bg-white w-8'
-                    : 'bg-white/30 w-2 hover:bg-white/50'}`}
+                className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${index === currentIndex ? 'bg-white w-8' : 'bg-white/30 w-2 hover:bg-white/50'}`}
                 aria-label={`Go to slide ${index + 1}`}
               />
             ))}
