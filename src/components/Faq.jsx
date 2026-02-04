@@ -134,8 +134,7 @@ export default function FAQPage() {
   const [openIndex, setOpenIndex] = useState(null);
   return (
     <div
-      className="min-h-20vh bg-black
- text-[#EBECF3] flex flex-col  items-start px-6 py-20"
+      className="min-h-20vh bg-black text-[#EBECF3] flex flex-col items-start px-6 py-20"
       id="section8"
     >
       <h1 className="font-zentry text-7xl font-bold mb-4 text-left w-full">
@@ -151,9 +150,8 @@ export default function FAQPage() {
           {Object.keys(faqData).map((category) => (
             <button
               key={category}
-              className={`px-3 py-1 sm:px-4 sm:py-2 text-xs sm:text-base rounded-full border border-[#3E4250] ${
-                selectedCategory === category ? "bg-pink-600 text-black" : ""
-              }`}
+              className={`px-3 py-1 sm:px-4 sm:py-2 text-xs sm:text-base rounded-full border border-[#3E4250] ${selectedCategory === category ? "bg-pink-600 text-black" : ""
+                }`}
               onClick={() => setSelectedCategory(category)}
             >
               {category}
