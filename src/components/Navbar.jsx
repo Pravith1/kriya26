@@ -23,6 +23,7 @@ const NavBar = () => {
   const { y: currentScrollY } = useWindowScroll();
   const [isNavVisible, setIsNavVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [showLogo, setShowLogo] = useState(true);
 
   // Toggle audio and visual indicator
   const toggleAudioIndicator = () => {
@@ -52,16 +53,19 @@ const NavBar = () => {
 
   useEffect(() => {
     if (currentScrollY === 0) {
-      // Topmost position: show navbar without floating-nav
+      // At top: show navbar and logo, no floating
       setIsNavVisible(true);
+      setShowLogo(true);
       navContainerRef.current.classList.remove("floating-nav");
     } else if (currentScrollY > lastScrollY) {
-      // Scrolling down: hide navbar and apply floating-nav
+      // Scrolling down: hide navbar
       setIsNavVisible(false);
+      setShowLogo(false);
       navContainerRef.current.classList.add("floating-nav");
     } else if (currentScrollY < lastScrollY) {
-      // Scrolling up: show navbar with floating-nav
+      // Scrolling up: show navbar but hide logo (unless at top)
       setIsNavVisible(true);
+      setShowLogo(currentScrollY === 0);
       navContainerRef.current.classList.add("floating-nav");
     }
 
@@ -79,26 +83,30 @@ const NavBar = () => {
   return (
     <div
       ref={navContainerRef}
-      className="fixed inset-x-0 top-4 z-50 h-16 border-none transition-all duration-700 sm:inset-x-0 w-full"
+      className="fixed inset-x-0 top-0 z-50 h-16 border-none transition-all duration-700 sm:inset-x-0 w-full bg-black/80 backdrop-blur-md"
     >
       <header className="absolute top-1/2 w-full -translate-y-1/2 flex justify-between px-4 sm:px-6 md:px-10">
         <div className="flex items-center gap-2 md:gap-4">
-          <Image
-            src="/Logo/PSG_LOGO.png"
-            alt="PSG Logo"
-            width={100}
-            height={130}
-            className="h-16 sm:h-16 md:h-20 lg:h-28 w-auto"
-          />
-          <Image
-            src="/Logo/Year75w.webp"
-            alt="75 Years Logo"
-            width={60}
-            height={60}
-            className="h-12 sm:h-10 md:h-12 lg:h-15 w-auto"
-          />
+          {showLogo && (
+            <>
+              <Image
+                src="/Logo/PSG_LOGO.png"
+                alt="PSG Logo"
+                width={100}
+                height={130}
+                className="h-16 sm:h-16 md:h-20 lg:h-28 w-auto transition-opacity duration-300"
+              />
+              <Image
+                src="/Logo/Year75w.png"
+                alt="75 Years Logo"
+                width={60}
+                height={60}
+                className="h-12 sm:h-10 md:h-12 lg:h-15 w-auto transition-opacity duration-300"
+              />
+            </>
+          )}
         </div>
-        
+
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center">
           <div className="flex h-full items-center">
@@ -138,7 +146,7 @@ const NavBar = () => {
             </button>
           </div>
         </nav>
-        
+
         {/* Mobile Menu Button */}
         <div className="flex items-center md:hidden">
           <button
@@ -163,7 +171,7 @@ const NavBar = () => {
               />
             ))}
           </button>
-          
+
           <button
             onClick={toggleMobileMenu}
             className="flex flex-col justify-center items-center w-8 h-8 space-y-1"
@@ -174,7 +182,7 @@ const NavBar = () => {
           </button>
         </div>
       </header>
-      
+
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden absolute top-16 left-0 right-0 bg-black/90 backdrop-blur-md border-t border-white/20 z-40">
