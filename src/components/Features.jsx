@@ -102,16 +102,6 @@ export const BentoCard = ({ src, title, description, isComingSoon }) => {
 const Features = () => (
   <section className="bg-black pb-52">
     <div className="container mx-auto px-3 md:px-10">
-      <div className="px-5 py-32">
-        <p className="font-circular-web text-lg text-[#dfdff2]">
-          Into the Metagame Layer
-        </p>
-        <p className="max-w-md font-circular-web text-lg text-[#dfdff2] opacity-50">
-          Immerse yourself in a rich and ever-expanding universe where a vibrant
-          array of products converge into an interconnected overlay experience
-          on your world.
-        </p>
-      </div>
 
       <BentoTilt className="bento-tilt_1 relative mb-7 h-96 w-full overflow-hidden rounded-md md:h-[65vh]">
         <BentoCard

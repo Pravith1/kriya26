@@ -1,16 +1,17 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import AnimatedTitle from '../AnimatedTitle';
 
 const Home = () => {
   const [isClient, setIsClient] = useState(false);
 
   const eventDetails = {
-    title: 'Kriya 2025 - Technical Symposium',
-    startTime: '2025-03-14T09:00:00',
-    endTime: '2025-03-16T17:00:00',
+    title: 'Kriya 2026 - Technical Symposium',
+    startTime: '2026-03-14T09:00:00',
+    endTime: '2026-03-16T17:00:00',
     location: 'PSG College of Technology, Coimbatore',
-    description: 'Join us at the forefront of technological advancements and gain valuable insights at our upcoming technical symposium Kriya 2025.',
+    description: 'Join us at the forefront of technological advancements and gain valuable insights at our upcoming technical symposium Kriya 2026.',
   };
 
   useEffect(() => {
@@ -34,20 +35,25 @@ const Home = () => {
 
   return (
     <div className='flex items-center '>
-      <div className="flex flex-col items-center lg:items-start md:py-14 px-14">
-        <div>
-        <h1 className="flex flex-col justify-center mb-1 text-5xl font-bold text-white md:text-6xl lg:text-7xl">
-          Mark Your <span className="text-pink-600 bg-clip-text">Calendar !</span>
-        </h1>
+      <div className="flex flex-col items-center lg:items-start md:py-6 lg:py-8 px-14">
+        <div className="mb-2">
+          <h1 className="special-font text-4xl md:text-5xl lg:text-6xl font-black uppercase text-white text-center lg:text-left">
+            <b>M</b>ark <b>Y</b>our <br className="block lg:hidden" />
+            <span style={{ color: '#9146FF' }}><b>C</b>alendar !</span>
+          </h1>
         </div>
-       
 
-        <p className="my-5 text-white md:text-lg lg:text-xl text-center lg:text-left">{eventDetails.description}</p>
 
-        <div className="flex items-center space-x-4">
+        <p className="my-3 text-white text-sm md:text-base lg:text-lg text-center lg:text-left">{eventDetails.description}</p>
+
+        <div className="flex items-center space-x-4 mt-2">
           <button
             onClick={handleAddToCalendar}
-            className="px-8 py-3 text-sm font-semibold text-white transition-all duration-300 ease-in-out transform bg-pink-600 rounded-full shadow-lg lg:text-lg hover:scale-105 hover:shadow-xl lg:mt-1"
+            className="px-6 py-2 text-sm font-semibold text-white transition-all duration-300 ease-in-out transform rounded-full shadow-lg lg:text-base hover:scale-105 hover:shadow-xl"
+            style={{
+              backgroundColor: '#9146FF',
+              boxShadow: '0 0 30px rgba(145, 70, 255, 0.4)'
+            }}
           >
             Add to Calendar
           </button>

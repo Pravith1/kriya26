@@ -10,14 +10,14 @@ export default function CountDown() {
     const sectionRef = useRef(null);
 
     return (
-        <main className="flex flex-col w-screen sm:h-screen overflow-hidden bg-black md:h-auto lg:h-screen xl:h-screen ">
+        <main className="flex flex-col w-screen sm:h-screen overflow-hidden bg-black md:h-auto lg:h-screen xl:h-screen">
             {/* Date Slider - Always at top */}
-            <div className="pt-10">
+            <div className="pt-6 pb-4 px-4">
                 <DateSlider />
             </div>
 
             {/* Responsive container for Main and Countdown */}
-            <div className="flex flex-col flex-1 w-full gap-10 py-10 md:gap-0 md:justify-between md:flex-row">
+            <div className="flex flex-col flex-1 w-full gap-6 py-4 md:gap-0 md:justify-between md:flex-row">
                 {/* Countdown - Second on mobile, right on desktop */}
                 <div className="w-full md:w-[50%] flex md:hidden">
                     <Countdown />
