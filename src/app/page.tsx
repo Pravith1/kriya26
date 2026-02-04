@@ -6,6 +6,7 @@ import Flagship from "@/components/Story";
 import PaperPresentation from "@/components/PaperPresentation";
 import Footer from "@/components/Footer";
 import CountDown from "@/components/Countdown";
+import Faq from "@/components/Faq";
 
 export default function Home() {
   return (
@@ -18,6 +19,7 @@ export default function Home() {
       <Events />
       <PaperPresentation />
       <Footer />
+      <Faq/>
     </main>
   );
 }
