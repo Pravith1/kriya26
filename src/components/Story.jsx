@@ -2,46 +2,29 @@
 import gsap from "gsap";
 import { useRef, useState, useCallback, useEffect } from "react";
 import { motion, useInView } from "framer-motion";
+import { eventService } from "../services/eventservice";
 
-// Slides data
-const STORY_SLIDES = [
-  {
-    id: 1,
-    image: "/img/entrance.webp",
-    alt: "Event 1",
-    title: "SPEEDDRIFTERS 2.0",
-    location: "N BLOCK GROUND",
-    time: "9:30 AM - 4:30 PM",
-    day: "14",
-    month: "MARCH",
-    year: "2025",
-    color: "#8750f7" // Purple
-  },
-  {
-    id: 2,
-    image: "/img/entrance.webp",
-    alt: "Event 2",
-    title: "ROBOTIC VISION",
-    location: "AUDITORIUM",
-    time: "10:00 AM - 5:00 PM",
-    day: "15",
-    month: "MARCH",
-    year: "2025",
-    color: "#f75050" // Red
-  },
-  {
-    id: 3,
-    image: "/img/entrance.webp",
-    alt: "Event 3",
-    title: "AI CHALLENGE",
-    location: "E BLOCK LAB",
-    time: "9:00 AM - 3:00 PM",
-    day: "16",
-    month: "MARCH",
-    year: "2025",
-    color: "#50c8f7" // Blue
-  },
+// Event IDs to fetch
+const FLAGSHIP_EVENT_IDS = ["EVNT34", "EVNT20", "EVNT09", "EVNT25", "EVNT32", "EVNT40"];
+
+// Random colors for cards
+const CARD_COLORS = [
+  "#8750f7", // Purple
+  "#f75050", // Red
+  "#50c8f7", // Blue
+  "#50f7a6", // Green
+  "#f7a850", // Orange
+  "#f750b4", // Pink
 ];
+
+// Helper to format date
+const formatEventDate = (dateString) => {
+  const date = new Date(dateString);
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = date.toLocaleString('en-US', { month: 'long' }).toUpperCase();
+  const year = date.getFullYear().toString();
+  return { day, month, year };
+};
 
 // Animation configuration (elastic easing from CardSwap)
 const ANIMATION_CONFIG = {
@@ -56,7 +39,7 @@ const ANIMATION_CONFIG = {
 // Card distance settings
 const CARD_DISTANCE = 60;
 const VERTICAL_DISTANCE = 30; // Reduced to prevent header overlap
-const SKEW_AMOUNT = 6;
+const SKEW_AMOUNT = 3;
 const AUTO_SWAP_DELAY = 5000;
 
 // Calculate slot position for each card in the stack
@@ -69,7 +52,7 @@ const makeSlot = (i, distX, distY, total) => ({
 });
 
 // Immediately place card at slot position
-const placeNow = (el, slot, skew) =>
+const placeNow = (el, slot, skew, totalCards) =>
   gsap.set(el, {
     x: slot.x,
     y: slot.y,
@@ -81,18 +64,20 @@ const placeNow = (el, slot, skew) =>
     zIndex: slot.zIndex,
     force3D: true,
     opacity: 1,
-    pointerEvents: slot.zIndex === STORY_SLIDES.length ? 'auto' : 'none'
+    pointerEvents: slot.zIndex === totalCards ? 'auto' : 'none'
   });
 
 const FloatingImage = () => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [events, setEvents] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const cardsRef = useRef([]);
   const containerRef = useRef(null);
   const cardStackRef = useRef(null);
 
   // Order tracking - which card is in which position
-  const orderRef = useRef(Array.from({ length: STORY_SLIDES.length }, (_, i) => i));
+  const orderRef = useRef([]);
   const tlRef = useRef(null);
   const intervalRef = useRef(null);
 
@@ -100,15 +85,53 @@ const FloatingImage = () => {
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
 
-  // Initialize card positions
+  // Fetch and process flagship event details
   useEffect(() => {
-    const total = STORY_SLIDES.length;
+    const fetchEventDetails = async () => {
+      try {
+        const eventPromises = FLAGSHIP_EVENT_IDS.map(id => eventService.getEventById(id));
+        const responses = await Promise.all(eventPromises);
+        console.log("Flagship Event Details:", responses);
+
+        // Extract and format event data
+        const processedEvents = responses.map((res, index) => {
+          const event = res.event;
+          const { day, month, year } = formatEventDate(event.date);
+          return {
+            id: event.eventId,
+            image: "/img/entrance.webp",
+            alt: event.eventName,
+            title: event.eventName,
+            location: event.hall,
+            time: event.timing || "TBD",
+            day,
+            month,
+            year,
+            color: CARD_COLORS[index % CARD_COLORS.length]
+          };
+        });
+
+        setEvents(processedEvents);
+        // Initialize order tracking
+        orderRef.current = Array.from({ length: processedEvents.length }, (_, i) => i);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error fetching event details:", error);
+      }
+    };
+    fetchEventDetails();
+  }, []);
+
+  // Initialize card positions when events are loaded
+  useEffect(() => {
+    if (events.length === 0) return;
+    const total = events.length;
     cardsRef.current.forEach((card, i) => {
       if (card) {
-        placeNow(card, makeSlot(i, CARD_DISTANCE, VERTICAL_DISTANCE, total), SKEW_AMOUNT);
+        placeNow(card, makeSlot(i, CARD_DISTANCE, VERTICAL_DISTANCE, total), SKEW_AMOUNT, total);
       }
     });
-  }, []);
+  }, [events]);
 
   // Swap animation - front card drops and returns to back
   const swap = useCallback(() => {
@@ -139,7 +162,7 @@ const FloatingImage = () => {
     rest.forEach((idx, i) => {
       const el = cardsRef.current[idx];
       if (!el) return;
-      const slot = makeSlot(i, CARD_DISTANCE, VERTICAL_DISTANCE, STORY_SLIDES.length);
+      const slot = makeSlot(i, CARD_DISTANCE, VERTICAL_DISTANCE, events.length);
       tl.set(el, { zIndex: slot.zIndex, pointerEvents: i === 0 ? 'auto' : 'none' }, 'promote');
       tl.to(
         el,
@@ -155,7 +178,7 @@ const FloatingImage = () => {
     });
 
     // Return front card to back position
-    const backSlot = makeSlot(STORY_SLIDES.length - 1, CARD_DISTANCE, VERTICAL_DISTANCE, STORY_SLIDES.length);
+    const backSlot = makeSlot(events.length - 1, CARD_DISTANCE, VERTICAL_DISTANCE, events.length);
     tl.addLabel('return', `promote+=${ANIMATION_CONFIG.durMove * ANIMATION_CONFIG.returnDelay}`);
     tl.call(
       () => {
@@ -175,7 +198,7 @@ const FloatingImage = () => {
       },
       'return'
     );
-  }, [isAnimating]);
+  }, [isAnimating, events.length]);
 
   // Auto-swap interval - works on both mobile and desktop
   useEffect(() => {
@@ -242,7 +265,7 @@ const FloatingImage = () => {
     tlRef.current = tl;
 
     // Bring back card up from bottom
-    const frontSlot = makeSlot(0, CARD_DISTANCE, VERTICAL_DISTANCE, STORY_SLIDES.length);
+    const frontSlot = makeSlot(0, CARD_DISTANCE, VERTICAL_DISTANCE, events.length);
 
     // First move back card below visible area
     tl.set(elBack, { y: '+=500', zIndex: frontSlot.zIndex + 1, pointerEvents: 'auto' });
@@ -261,7 +284,7 @@ const FloatingImage = () => {
     order.slice(0, -1).forEach((idx, i) => {
       const el = cardsRef.current[idx];
       if (!el) return;
-      const slot = makeSlot(i + 1, CARD_DISTANCE, VERTICAL_DISTANCE, STORY_SLIDES.length);
+      const slot = makeSlot(i + 1, CARD_DISTANCE, VERTICAL_DISTANCE, events.length);
       tl.set(el, { zIndex: slot.zIndex, pointerEvents: 'none' }, 'demote');
       tl.to(
         el,
@@ -275,7 +298,7 @@ const FloatingImage = () => {
         `demote+=${i * 0.15}`
       );
     });
-  }, [isAnimating]);
+  }, [isAnimating, events.length]);
 
   // Touch handlers for mobile swipe
   const handleTouchStart = (e) => {
@@ -327,7 +350,7 @@ const FloatingImage = () => {
           {/* Card Stack Container */}
           <div
             ref={containerRef}
-            className="relative w-full h-[50vh] md:h-[60vh] flex items-center justify-center group pt-12"
+            className="relative w-full h-[50vh] md:h-[60vh] flex items-center justify-center group pt-20"
             style={{ perspective: "900px" }}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
@@ -340,7 +363,12 @@ const FloatingImage = () => {
                 transformStyle: "preserve-3d",
               }}
             >
-              {STORY_SLIDES.map((slide, index) => (
+              {isLoading && (
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-gray-500">
+                  <div className="animate-spin w-10 h-10 border-4 border-gray-300 border-t-black rounded-full"></div>
+                </div>
+              )}
+              {events.map((slide, index) => (
                 <div
                   key={slide.id}
                   ref={(el) => (cardsRef.current[index] = el)}
@@ -350,7 +378,10 @@ const FloatingImage = () => {
                     height: '100%',
                     transformStyle: "preserve-3d",
                     backfaceVisibility: "hidden",
-                    willChange: "transform"
+                    willChange: "transform",
+                    opacity: 1,
+                    transform: `translate(-50%, -50%) translateX(${index * CARD_DISTANCE}px) translateY(${index * VERTICAL_DISTANCE}px) skewY(${SKEW_AMOUNT}deg)`,
+                    zIndex: events.length - index
                   }}
                   onClick={() => window.location.href = '#'}
                 >
@@ -424,7 +455,7 @@ const FloatingImage = () => {
 
             {/* Slide Indicators */}
             <div className="flex justify-center gap-3">
-              {STORY_SLIDES.map((_, index) => (
+              {events.map((_, index) => (
                 <button
                   key={index}
                   disabled={isAnimating}
