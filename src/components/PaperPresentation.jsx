@@ -6,6 +6,19 @@ import PaperPresentationItemDesktop from './paper_presentation/PaperPresentation
 import PaperPresentationItemMobile from './paper_presentation/PaperPresentationItemMobile';
 import AnimatedTitle from './AnimatedTitle';
 
+const STATIC_IMAGES = [
+    "/img/papers/pp1.png",
+    "/img/papers/pp2.png",
+    "/img/papers/pp3.png",
+    "/img/papers/pp4.png",
+    "/img/papers/pp5.png",
+    "/img/papers/pp6.png",
+    "/img/papers/pp7.png",
+    "/img/papers/pp8.png",
+    "/img/papers/pp9.png",
+    "/img/papers/pp10.png",
+];
+
 const PaperPresentation = () => {
     const [onMouseHoverIndex, setOnMouseHoverIndex] = useState(0);
     const [papers, setPapers] = useState([]);
@@ -28,7 +41,13 @@ const PaperPresentation = () => {
                     papersData = response.papers;
                 }
 
-                setPapers(papersData);
+                // Map static images to papers
+                const papersWithImages = papersData.map((paper, index) => ({
+                    ...paper,
+                    image: STATIC_IMAGES[index % STATIC_IMAGES.length],
+                }));
+
+                setPapers(papersWithImages);
                 setError(null);
             } catch (error) {
                 // Only log non-404 errors to avoid console spam
