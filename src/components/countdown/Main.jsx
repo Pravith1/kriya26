@@ -39,7 +39,7 @@ const Home = () => {
         <div className="mb-2">
           <h1 className="special-font text-4xl md:text-5xl lg:text-6xl font-black uppercase text-white text-center lg:text-left">
             <b>M</b>ark <b>Y</b>our <br className="block lg:hidden" />
-            <span style={{ color: '#9146FF' }}><b>C</b>alendar !</span>
+            <span style={{ color: '#3B82F6' }}><b>C</b>alendar !</span>
           </h1>
         </div>
 
@@ -51,7 +51,7 @@ const Home = () => {
             onClick={handleAddToCalendar}
             className="px-6 py-2 text-sm font-semibold text-white transition-all duration-300 ease-in-out transform rounded-full shadow-lg lg:text-base hover:scale-105 hover:shadow-xl"
             style={{
-              backgroundColor: '#9146FF',
+              backgroundColor: '#3B82F6',
               boxShadow: '0 0 30px rgba(145, 70, 255, 0.4)'
             }}
           >

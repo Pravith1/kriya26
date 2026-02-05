@@ -51,7 +51,7 @@ const DateSlider = () => {
             >
               <div className="flex flex-col items-center justify-center">
                 <div className="relative">
-                  <span className="text-5xl font-bold" style={{ color: '#9146FF' }}>
+                  <span className="text-5xl font-bold" style={{ color: '#3B82F6' }}>
                     {item.date}
                   </span>
                   <span className="absolute font-bold -top-0 left-full text-white">
@@ -80,7 +80,7 @@ const DateSlider = () => {
                       : "text-4xl lg:text-5xl xl:text-6xl font-bold hover:opacity-100 transition-opacity"
                       }`}
                     style={{
-                      color: [13, 14, 15].includes(item.date) ? '#9146FF' : '#D9D9D9'
+                      color: [13, 14, 15].includes(item.date) ? '#3B82F6' : '#D9D9D9'
                     }}
                   >
                     {item.date}
