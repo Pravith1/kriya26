@@ -5,7 +5,7 @@ import Events from "@/components/Features";
 import Flagship from "@/components/Story";
 import PaperPresentation from "@/components/PaperPresentation";
 import Workshops from "@/components/Workshop";
-import Footer from "@/components/Footer";
+import Sponsors from "@/components/Sponsors";
 import Contact from "@/components/Contact";
 import CountDown from "@/components/Countdown";
 import Faq from "@/components/Faq";
@@ -22,8 +22,8 @@ export default function Home() {
       <Events />
       <Workshops />
       <PaperPresentation />
+      <Sponsors />
       <Team />
-      <Footer />
       <Faq />
       <Contact />
 
