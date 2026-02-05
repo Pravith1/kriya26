@@ -8,16 +8,19 @@ import { TiLocationArrow, TiCalendar } from "react-icons/ti";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi2";
 
 const STATIC_IMAGES = [
-  "/img/gallery-1.webp",
-  "/img/gallery-2.webp",
-  "/img/gallery-3.webp",
-  "/img/gallery-4.webp",
-  "/img/gallery-5.webp",
-  "/img/swordman.webp",
+  "/img/workshops/ws1.png",
+  //"/img/gallery-1.webp",
+  "/img/workshops/ws2.png",
+  "/img/workshops/ws3.png",
+  "/img/workshops/ws4.png",
+  "/img/workshops/ws5.png",
+  "/img/workshops/ws6.png",
   "/img/stones.webp",
-  "/img/entrance.webp",
-  "/img/about.webp",
-  "/img/contact-1.webp",
+  "/img/workshops/ws8.png",
+  "/img/workshops/ws9.png",
+  "/img/workshops/ws10.png",
+  "/img/workshops/ws11.png",
+  "/img/workshops/ws12.png",
   "/img/contact-2.webp",
 ];
 
