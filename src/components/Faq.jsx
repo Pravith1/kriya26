@@ -137,20 +137,20 @@ export default function FAQPage() {
       className="min-h-20vh bg-black text-[#EBECF3] flex flex-col items-start px-6 py-20"
       id="section8"
     >
-      <h1 className="font-zentry text-7xl font-bold mb-4 text-left w-full">
-        Frequently Asked Questions
+      <h1 className="font-zentry animated-word-static text-4xl md:text-5xl lg:text-6xl uppercase tracking-wider mb-4 font-black text-center w-full">
+        FREQUENTLY ASKED QUESTIONS
       </h1>
-      <p className="text-gray-400 font-poppins text-sm mb-2 text-left w-full">
+      <p className="text-gray-400 font-poppins text-sm mb-2 text-center w-full">
         Get the answers you need to navigate our platform with confidence.
       </p>
 
       {/* Category Buttons */}
-      <div className="w-full overflow-x-auto no-scrollbar">
-        <div className="flex gap-4 mb-6 text-xs sm:text-m self-start mt-5 whitespace-nowrap">
+      <div className="w-full overflow-x-auto no-scrollbar px-0">
+        <div className="flex gap-4 mb-6 text-xs sm:text-m justify-start md:justify-center mt-5 whitespace-nowrap w-max md:w-full mx-auto">
           {Object.keys(faqData).map((category) => (
             <button
               key={category}
-              className={`px-3 py-1 sm:px-4 sm:py-2 text-xs sm:text-base rounded-full border border-[#3E4250] ${selectedCategory === category ? "bg-pink-600 text-black" : ""
+              className={`px-3 py-1 sm:px-4 sm:py-2 text-xs sm:text-base rounded-full border border-[#3E4250] ${selectedCategory === category ? "bg-blue-500 text-black" : ""
                 }`}
               onClick={() => setSelectedCategory(category)}
             >
