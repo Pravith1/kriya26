@@ -10,7 +10,7 @@ export const eventService = {
 
     // Get event by ID (using eventId field, not MongoDB _id)
     getEventById: async (eventId) => {
-        const response = await api.get(`/api/events?eventId=${eventId}`);
+        const response = await api.get(`/api/events/${eventId}`);
         const data = response.data;
 
         // Handle different response formats
