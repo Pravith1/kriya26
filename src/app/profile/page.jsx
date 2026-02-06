@@ -1,54 +1,101 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import StatsGrid from "@/components/profile/StatsGrid";
 import QRCodeSection from "@/components/profile/QRCodeSection";
 import EventTicket from "@/components/profile/EventTicket";
 import ScrollableContainer from "@/components/profile/ScrollableContainer";
+import { useAuth } from "@/context/AuthContext";
+import { eventService } from "@/services/eventservice";
 
-// Mock Data for Development
-const USER_DATA = {
-    name: "Adhish Krishna S",
-    kriyaId: "KRIYA-26-4892",
-    college: "PSG College of Technology",
-    email: "alex.sterling@example.com",
-    avatar: "/img/gallery-2.webp",
-    department: "CSE AI ML",
-    isPaid: true,
-    year: "3"
+// Color mapping for event categories
+const getCategoryColor = (category, itemType) => {
+    if (itemType === 'workshop') return 'bg-emerald-500';
+    if (itemType === 'paper') return 'bg-yellow-500';
+
+    const cat = (category || '').toLowerCase();
+    if (cat.includes('non technical') || cat.includes('non-technical')) return 'bg-cyan-500';
+    if (cat.includes('technical')) return 'bg-pink-500';
+    return 'bg-blue-500';
 };
 
-const STATS_DATA = {
-    eventsCount: 4,
-    workshopsCount: 2,
-    isPaid: true
-};
-
-const REGISTERED_EVENTS = [
-    { id: 1, title: "Paper Pres.", category: "CS", date: "March 14", time: "10:00 AM", venue: "F-Block", color: "bg-blue-500" },
-    { id: 2, title: "Robo Wars", category: "Robotics", date: "March 15", time: "11:30 AM", venue: "Quadrangle", color: "bg-red-500" },
-    { id: 3, title: "Code Rush", category: "Coding", date: "March 14", time: "02:00 PM", venue: "Comp. Labs", color: "bg-violet-500" },
-    { id: 4, title: "Circuit Debug", category: "Electrical", date: "March 16", time: "09:00 AM", venue: "E-Block", color: "bg-yellow-500" }
-];
-
-const WORKSHOPS = [
-    { id: 101, title: "AI/ML Masterclass", category: "Workshop", date: "March 15", time: "10:00 AM", venue: "Assembly Hall", color: "bg-emerald-500" },
-    { id: 102, title: "Drone Tech", category: "Workshop", date: "March 16", time: "01:30 PM", venue: "Ground 2", color: "bg-orange-500" }
-];
+// Transform API event to EventTicket format
+const transformEvent = (item, itemType) => ({
+    id: item._id || item.eventId || item.workshopId || item.paperId,
+    title: item.eventName || item.workshopName || item.name || 'Unnamed Event',
+    category: item.category || (itemType === 'workshop' ? 'Workshop' : itemType === 'paper' ? 'Paper' : 'Event'),
+    date: item.date || 'TBA',
+    time: item.time || 'TBA',
+    venue: item.venue || 'TBA',
+    color: getCategoryColor(item.category, itemType),
+    link: itemType === 'workshop'
+        ? `/portal/workshop/${item.workshopId}`
+        : itemType === 'paper'
+            ? `/portal/paper/${item.paperId}`
+            : `/portal/event/${item.eventId}`,
+    itemType
+});
 
 export default function ProfilePage() {
+    const router = useRouter();
+    const { user, loading: authLoading, isAuthenticated } = useAuth();
     const [activeTab, setActiveTab] = useState("profile");
+    const [events, setEvents] = useState([]);
+    const [workshops, setWorkshops] = useState([]);
+    const [papers, setPapers] = useState([]);
+    const [dataLoading, setDataLoading] = useState(true);
+    const [error, setError] = useState(null);
     const vantaRef = useRef(null);
 
-    // Filter events by type
-    const paperPresentations = REGISTERED_EVENTS.filter(e => e.category === "paper_presentation");
-    const otherEvents = REGISTERED_EVENTS.filter(e => e.category !== "paper_presentation");
-    const hasPaperPresentations = paperPresentations.length > 0;
+    // Redirect to auth if not authenticated
+    useEffect(() => {
+        if (!authLoading && !isAuthenticated) {
+            router.push('/auth?type=login');
+        }
+    }, [authLoading, isAuthenticated, router]);
+
+    // Fetch user registrations
+    useEffect(() => {
+        const fetchRegistrations = async () => {
+            if (!isAuthenticated) return;
+
+            try {
+                setDataLoading(true);
+                const [eventsRes, workshopsRes, papersRes] = await Promise.all([
+                    eventService.getUserEvents().catch(() => []),
+                    eventService.getUserWorkshops().catch(() => []),
+                    eventService.getUserPapers().catch(() => [])
+                ]);
+
+                // Safe extraction helper
+                const safeExtract = (res, key) => {
+                    if (!res) return [];
+                    if (Array.isArray(res)) return res;
+                    if (res[key] && Array.isArray(res[key])) return res[key];
+                    if (res.data && Array.isArray(res.data)) return res.data;
+                    return [];
+                };
+
+                setEvents(safeExtract(eventsRes, 'events').map(e => transformEvent(e, 'event')));
+                setWorkshops(safeExtract(workshopsRes, 'workshops').map(w => transformEvent(w, 'workshop')));
+                setPapers(safeExtract(papersRes, 'papers').map(p => transformEvent(p, 'paper')));
+            } catch (err) {
+                console.error('Error fetching registrations:', err);
+                setError('Failed to load registrations');
+            } finally {
+                setDataLoading(false);
+            }
+        };
+
+        fetchRegistrations();
+    }, [isAuthenticated]);
 
     // Vanta Waves Background Effect
     useEffect(() => {
         let vantaEffect = null;
+        let isMounted = true;
 
         const loadVanta = async () => {
             if (typeof window !== 'undefined') {
@@ -63,7 +110,7 @@ export default function ProfilePage() {
                 }
 
                 // Load Vanta Waves
-                if (!window.VANTA || !window.VANTA.WAVES) {
+                if (!window.VANTA?.WAVES) {
                     const vantaScript = document.createElement('script');
                     vantaScript.src = 'https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.waves.min.js';
                     document.head.appendChild(vantaScript);
@@ -73,8 +120,11 @@ export default function ProfilePage() {
                     });
                 }
 
+                // Wait a frame to ensure DOM is ready
+                await new Promise((resolve) => requestAnimationFrame(resolve));
+
                 // Initialize Vanta effect
-                if (window.VANTA && vantaRef.current) {
+                if (isMounted && window.VANTA?.WAVES && vantaRef.current) {
                     vantaEffect = window.VANTA.WAVES({
                         el: vantaRef.current,
                         mouseControls: true,
@@ -97,9 +147,50 @@ export default function ProfilePage() {
         loadVanta();
 
         return () => {
+            isMounted = false;
             if (vantaEffect) vantaEffect.destroy();
         };
     }, []);
+
+    // Build user data for ProfileHeader
+    const userData = user ? {
+        name: user.name || 'KRIYA USER',
+        kriyaId: user.uniqueId || 'KRIYA-26-0000',
+        college: user.college || 'Not Set',
+        email: user.email || 'user@example.com',
+        phone: user.phone || 'Not Set',
+        department: user.department || 'Not Set',
+        year: user.year || '?',
+        avatar: user.avatar || '/img/gallery-1.webp',
+        isPaid: user.generalFeePaid
+    } : {};
+
+    // Build stats data
+    const statsData = {
+        eventsCount: events.length,
+        workshopsCount: workshops.length,
+        isPaid: user?.generalFeePaid || false
+    };
+
+    // Filter paper presentations
+    const hasPaperPresentations = papers.length > 0;
+
+    // Show loading state
+    if (authLoading || (isAuthenticated && dataLoading)) {
+        return (
+            <div className="min-h-screen w-full bg-black text-white flex items-center justify-center">
+                <div className="text-center">
+                    <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="font-general text-sm uppercase tracking-wider text-gray-400">Loading Profile...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Don't render if not authenticated (redirect will happen)
+    if (!isAuthenticated) {
+        return null;
+    }
 
     return (
         <div className="min-h-screen w-full bg-black text-white pt-28 pb-20 px-4 md:px-8 lg:px-12 relative">
@@ -136,19 +227,19 @@ export default function ProfilePage() {
                     <>
                         {/* Row 1: Profile Header (Full Width) */}
                         <section>
-                            <ProfileHeader user={USER_DATA} />
+                            <ProfileHeader user={userData} />
                         </section>
 
                         {/* Row 2: Stats Row (Horizontal) */}
                         <section>
-                            <StatsGrid stats={STATS_DATA} />
+                            <StatsGrid stats={statsData} />
                         </section>
 
                         {/* Row 3: QR Code + My Workshops (Side by Side) */}
                         <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                             {/* QR Code Section (Left) */}
                             <div className="lg:col-span-4">
-                                <QRCodeSection ticketId={USER_DATA.kriyaId} />
+                                <QRCodeSection ticketId={userData.kriyaId} />
                             </div>
 
                             {/* My Workshops Section (Right) */}
@@ -156,13 +247,17 @@ export default function ProfilePage() {
                                 <div className="flex items-end gap-4 mb-4 border-b border-white/10 pb-2">
                                     <h2 className="special-font text-2xl md:text-3xl uppercase text-white"><b>My Workshops</b></h2>
                                     <span className="font-general text-xs text-gray-500 mb-1 uppercase tracking-wide">
-                                        {WORKSHOPS.length} Enrolled
+                                        {workshops.length} Enrolled
                                     </span>
                                 </div>
                                 <ScrollableContainer maxHeight="300px">
-                                    {WORKSHOPS.map(workshop => (
-                                        <EventTicket key={workshop.id} event={workshop} />
-                                    ))}
+                                    {workshops.length > 0 ? (
+                                        workshops.map(workshop => (
+                                            <EventTicket key={workshop.id} event={workshop} />
+                                        ))
+                                    ) : (
+                                        <p className="text-gray-500 font-general text-sm text-center py-8">No workshops enrolled yet</p>
+                                    )}
                                 </ScrollableContainer>
                             </div>
                         </section>
@@ -174,13 +269,17 @@ export default function ProfilePage() {
                                 <div className="flex items-end gap-4 mb-4 border-b border-white/10 pb-2">
                                     <h2 className="special-font text-2xl md:text-3xl uppercase text-white"><b>My Events</b></h2>
                                     <span className="font-general text-xs text-gray-500 mb-1 uppercase tracking-wide">
-                                        {otherEvents.length} Registered
+                                        {events.length} Registered
                                     </span>
                                 </div>
                                 <ScrollableContainer maxHeight="350px">
-                                    {otherEvents.map(event => (
-                                        <EventTicket key={event.id} event={event} />
-                                    ))}
+                                    {events.length > 0 ? (
+                                        events.map(event => (
+                                            <EventTicket key={event.id} event={event} />
+                                        ))
+                                    ) : (
+                                        <p className="text-gray-500 font-general text-sm text-center py-8">No events registered yet</p>
+                                    )}
                                 </ScrollableContainer>
                             </div>
 
@@ -190,12 +289,12 @@ export default function ProfilePage() {
                                     <div className="flex items-end gap-4 mb-4 border-b border-white/10 pb-2">
                                         <h2 className="special-font text-2xl md:text-3xl uppercase text-white"><b>My Paper Presentations</b></h2>
                                         <span className="font-general text-xs text-gray-500 mb-1 uppercase tracking-wide">
-                                            {paperPresentations.length} Submitted
+                                            {papers.length} Submitted
                                         </span>
                                     </div>
                                     <ScrollableContainer maxHeight="350px">
-                                        {paperPresentations.map(event => (
-                                            <EventTicket key={event.id} event={event} />
+                                        {papers.map(paper => (
+                                            <EventTicket key={paper.id} event={paper} />
                                         ))}
                                     </ScrollableContainer>
                                 </div>
@@ -217,5 +316,3 @@ export default function ProfilePage() {
         </div>
     );
 }
-
-
