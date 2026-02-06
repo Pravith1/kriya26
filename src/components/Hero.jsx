@@ -16,9 +16,11 @@ const Hero = () => {
 
   useEffect(() => {
     let vantaEffect = null;
+    let isMounted = true;
 
     const loadVanta = async () => {
       if (typeof window !== 'undefined') {
+        // Load THREE.js if not present
         if (!window.THREE) {
           const threeScript = document.createElement('script');
           threeScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r121/three.min.js';
@@ -29,8 +31,8 @@ const Hero = () => {
           });
         }
 
-        // Load Vanta Rings
-        if (!window.VANTA) {
+        // Load Vanta Rings if not present (check for RINGS specifically, not just VANTA)
+        if (!window.VANTA?.RINGS) {
           const vantaScript = document.createElement('script');
           vantaScript.src = 'https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.rings.min.js';
           document.head.appendChild(vantaScript);
@@ -40,8 +42,11 @@ const Hero = () => {
           });
         }
 
-        // Initialize Vanta effect
-        if (window.VANTA && vantaRef.current) {
+        // Wait a frame to ensure DOM is ready and scripts are fully initialized
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+
+        // Initialize Vanta effect only if component is still mounted
+        if (isMounted && window.VANTA?.RINGS && vantaRef.current) {
           vantaEffect = window.VANTA.RINGS({
             el: vantaRef.current,
             mouseControls: true,
@@ -64,6 +69,7 @@ const Hero = () => {
     loadVanta();
 
     return () => {
+      isMounted = false;
       if (vantaEffect) vantaEffect.destroy();
     };
   }, []);
@@ -179,6 +185,7 @@ const Hero = () => {
               title="EXPLORE EVENTS"
               containerClass="border-2 border-white/40 hover:bg-white/10 flex-center gap-2 px-4 py-3 rounded-full font-zentry font-semibold transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 backdrop-blur-sm pointer-events-auto w-full"
               leftIcon={<TiLocationArrow className="w-5 h-5 group-hover:animate-bounce" />}
+              onClick={() => router.push("/portal/event")}
             />
           </div>
         </div>
@@ -263,7 +270,7 @@ const Hero = () => {
                 title="EXPLORE EVENTS"
                 containerClass="bg-white font-bold flex-center gap-2 px-8 py-4 rounded-xl font-zentry text-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 pointer-events-auto"
                 leftIcon={<TiLocationArrow className="w-5 h-5 group-hover:animate-bounce" />}
-                onClick={()=>router.push("/portal/event")}
+                onClick={() => router.push("/portal/event")}
               />
             </div>
           </div>
