@@ -36,7 +36,7 @@ export default function CallbackComponent() {
 
                 if (existingUser) {
                     await googleLogin({ email, googleId, existing_user: true });
-                    router.push('/portal/profile');
+                    router.push('/profile');
                 } else {
                     localStorage.setItem('registration_email', email);
                     localStorage.setItem('registration_googleId', googleId);

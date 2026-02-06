@@ -94,7 +94,7 @@ export default function Home({ params }) {
   };
   const handleRegister = async () => {
     if (!isLoggedIn) {
-      router.push("/auth?type=signup");
+      router.push("/auth?type=register");
     } else if (!generalPayment) {
       router.push("/auth/payment?type=GENERAL");
     } else {

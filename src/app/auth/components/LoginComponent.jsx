@@ -29,7 +29,7 @@ export default function LoginComponent() {
 
         try {
             await login({ email, password });
-            router.push(callbackUrl || '/portal/profile');
+            router.push(callbackUrl || '/profile');
         } catch (err) {
             setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
         } finally {

@@ -154,7 +154,7 @@ export default function RegisterComponent() {
             localStorage.removeItem('registration_googleId');
             localStorage.removeItem('club_referral_code');
 
-            router.push('/portal/profile');
+            router.push('/profile');
         } catch (err) {
             setError(err.response?.data?.message || 'Registration failed');
         } finally {

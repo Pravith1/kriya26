@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/all";
@@ -10,6 +11,7 @@ import { useEffect, useRef, useState } from "react";
 import Button from "./Button";
 
 const Hero = () => {
+  const router = useRouter();
   const vantaRef = useRef(null);
 
   useEffect(() => {
@@ -171,6 +173,7 @@ const Hero = () => {
               title="REGISTER NOW"
               containerClass="bg-blue-400 hover:bg-purple-700 flex-center gap-2 px-4 py-3 rounded-full font-zentry font-semibold transition-all duration-300 transform hover:scale-105 w-full"
               leftIcon={<TiLocationArrow className="w-4 h-4" />}
+              onClick={() => router.push('/auth')}
             />
             <Button
               title="EXPLORE EVENTS"
@@ -254,11 +257,13 @@ const Hero = () => {
                 titleClass="font-bold"
                 containerClass="bg-blue-400 font-bold flex-center gap-2 px-8 py-4 rounded-xl font-zentry text-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 pointer-events-auto"
                 leftIcon={<TiLocationArrow className="w-5 h-5 group-hover:animate-bounce" />}
+                onClick={() => router.push('/auth')}
               />
               <Button
                 title="EXPLORE EVENTS"
                 containerClass="bg-white font-bold flex-center gap-2 px-8 py-4 rounded-xl font-zentry text-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 pointer-events-auto"
                 leftIcon={<TiLocationArrow className="w-5 h-5 group-hover:animate-bounce" />}
+                onClick={()=>router.push("/portal/event")}
               />
             </div>
           </div>
