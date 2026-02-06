@@ -2,7 +2,7 @@
 import { useState, useRef } from "react";
 import { TiLocationArrow } from "react-icons/ti";
 
-export const BentoTilt = ({ children, className = "" }) => {
+export const BentoTilt = ({ children, className = "", onClick }) => {
   const [transformStyle, setTransformStyle] = useState("");
   const itemRef = useRef(null);
 
@@ -32,6 +32,7 @@ export const BentoTilt = ({ children, className = "" }) => {
       className={className}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
+      onClick={onClick}
       style={{ transform: transformStyle }}
     >
       {children}
@@ -66,7 +67,7 @@ export const BentoCard = ({ src, title, description, isComingSoon }) => {
         autoPlay
         className="absolute left-0 top-0 size-full object-cover object-center"
       />
-      <div className="relative z-10 flex size-full flex-col justify-between p-5 text-[#dfdff2]">
+      <div className="relative z-10 flex size-full flex-col justify-between p-5 text-blue-75">
         <div>
           <h1 className="bento-title special-font">{title}</h1>
           {description && (
@@ -109,7 +110,7 @@ const Features = () => {
             src="videos/feature-1.mp4"
             title={
               <>
-              
+
                 <b>S</b>cience & <b>T</b>echnology
               </>
             }
@@ -138,7 +139,7 @@ const Features = () => {
               src="videos/feature-4.mp4"
               title={
                 <>
-                
+
                   <b>C</b>ore <b>E</b>ngineering
                 </>
               }
