@@ -194,7 +194,7 @@ const WorkshopCard = ({ item, isHovered, isSiblingHovered, onHover, onLeave, ind
       </div>
 
       {/* Content Container */}
-      <div className="absolute bg-black/50 inset-0 flex flex-row items-end p-6 md:p-8 overflow-hidden gap-6">
+      <div className="absolute bg-black/60 inset-0 flex flex-row items-end p-6 md:p-8 overflow-hidden gap-6">
 
         {/* LEFT COLUMN: Title, Date, Button */}
         {/* Grows to fill space, but respects Right Column when present */}
