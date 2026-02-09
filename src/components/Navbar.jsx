@@ -22,6 +22,7 @@ const SECTION_HEADER_COLORS = {
   'features-section': true, // white header (Event categories)
   'workshops-section': true, // white header
   'paper-presentation-section': false, // black header
+  'sponsors-section': true, // white header (Sponsors)
   'section8': true, // white header (FAQ)
   'contact': true, // white header
 };
@@ -69,18 +70,16 @@ const NavBar = () => {
     }
   }, [isAudioPlaying]);
 
-  // Detect which section is currently visible and update header color
+  // Detect which section is under the navbar and update header color
   useEffect(() => {
     const detectCurrentSection = () => {
       const headerHeight = 80;
       const scrollY = window.scrollY;
-      const viewportTop = scrollY + headerHeight;
-      const viewportCenter = scrollY + window.innerHeight / 2;
+      // Sample a point near the bottom of the navbar to avoid early switching
+      const sampleY = scrollY + headerHeight - 6;
 
       const sections = Object.keys(SECTION_HEADER_COLORS);
       let currentSection = 'hero-frame';
-      let bestMatch = null;
-      let bestMatchScore = 0;
 
       for (const sectionId of sections) {
         const element = document.getElementById(sectionId);
@@ -90,41 +89,14 @@ const NavBar = () => {
         const elementTop = scrollY + rect.top;
         const elementBottom = elementTop + rect.height;
 
-        // Check if viewport center is within this section (highest priority)
-        if (viewportCenter >= elementTop && viewportCenter <= elementBottom) {
+        if (sampleY >= elementTop && sampleY <= elementBottom) {
           currentSection = sectionId;
-          bestMatch = sectionId;
           break;
         }
-
-        // Calculate how much of this section is visible
-        const visibleTop = Math.max(viewportTop, elementTop);
-        const visibleBottom = Math.min(scrollY + window.innerHeight, elementBottom);
-        const visibleHeight = Math.max(0, visibleBottom - visibleTop);
-        const sectionHeight = rect.height;
-        const visibilityScore = visibleHeight / sectionHeight;
-
-        // If this section is significantly visible, consider it
-        if (visibilityScore > 0.3 && visibilityScore > bestMatchScore) {
-          bestMatchScore = visibilityScore;
-          bestMatch = sectionId;
-        }
-      }
-
-      // Use best match if viewport center didn't match any section
-      if (!bestMatch && sections.length > 0) {
-        currentSection = bestMatch || 'hero-frame';
       }
 
       const shouldBeWhite = SECTION_HEADER_COLORS[currentSection] ?? false;
-      
-      // Only update state if it changed to avoid unnecessary re-renders
-      setHeaderIsWhite(prev => {
-        if (prev !== shouldBeWhite) {
-          return shouldBeWhite;
-        }
-        return prev;
-      });
+      setHeaderIsWhite(prev => (prev === shouldBeWhite ? prev : shouldBeWhite));
     };
 
     // Initial detection after a small delay to ensure DOM is ready
@@ -191,8 +163,8 @@ const NavBar = () => {
         transition: 'background-color 0.7s ease',
       }}
     >
-      <header className="absolute top-1/2 w-full -translate-y-1/2 px-4 sm:px-6 md:px-10">
-        <div className="grid grid-cols-3 items-center w-full">
+      <header className="absolute top-1/2 w-full -translate-y-1/2 px-4 sm:px-6 md:px-6 lg:px-10">
+        <div className="grid grid-cols-3 items-center w-full gap-2 md:gap-4">
 
           {/* LEFT: Institutional Logos (Desktop) / Hamburger (Mobile) */}
           <div className="flex items-center justify-start gap-4">
@@ -219,40 +191,40 @@ const NavBar = () => {
             </button>
 
             {/* Institutional Logos (Visible only on Desktop) */}
-            <div className="hidden md:flex items-center gap-4 opacity-90 hover:opacity-100 transition-opacity">
+            <div className="hidden md:flex items-center gap-2 lg:gap-4 opacity-90 hover:opacity-100 transition-opacity">
               <Image
                 src="/Logo/PSG_LOGO_v2.png"
                 alt="PSG Logo"
                 width={60}
                 height={60}
-                className="h-12 w-auto object-contain"
+                className="h-10 lg:h-12 w-auto object-contain"
               />
               <Image
                 src="/Logo/Year75w.png"
                 alt="75 Years Logo"
                 width={60}
                 height={60}
-                className="h-10 w-auto object-contain"
+                className="h-8 lg:h-10 w-auto object-contain"
               />
               <Image
-                src="/Logo/100yrlogo_v2.png"
+                src={headerIsWhite ? "/Logo/100yearsLogo_white.png" : "/Logo/100yrlogo_v2.png"}
                 alt="100 Years Logo"
                 width={60}
                 height={60}
-                className="h-10 w-auto object-contain"
+                className="h-8 lg:h-10 w-auto object-contain"
               />
             </div>
           </div>
 
           {/* CENTER: Kriya Logo (Main Brand) */}
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center min-w-0 px-2">
             <Image
               src={headerIsWhite ? "/Logo/kriya26black.png" : "/Logo/kriya26white.png"}
               alt="Kriya 2026 Logo"
               width={150}
               height={80}
               className={clsx(
-                "h-12 sm:h-14 md:h-16 w-auto object-contain transition-transform hover:scale-105",
+                "h-10 sm:h-12 md:h-14 lg:h-16 w-auto object-contain transition-transform hover:scale-105 max-w-full",
                 headerIsWhite ? "drop-shadow-[0_0_10px_rgba(0,0,0,0.3)]" : "drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]"
               )}
               onError={(e) => {
@@ -265,10 +237,10 @@ const NavBar = () => {
           </div>
 
           {/* RIGHT: Navigation + Profile (Desktop) / Profile (Mobile) */}
-          <div className="flex items-center justify-end gap-6">
+          <div className="flex items-center justify-end gap-2 md:gap-4 lg:gap-6">
 
-            {/* Desktop Navigation Links */}
-            <nav className="hidden md:flex items-center gap-6">
+            {/* Desktop Navigation Links - Hide on medium screens, show on large screens */}
+            <nav className="hidden lg:flex items-center gap-3 xl:gap-6">
               {navItems.map((item, index) => (
                 <a
                   key={index}

@@ -4,7 +4,7 @@ import SponsorList from "./sponsors/SponsorList";
 
 const Sponsors = () => {
     return (
-        <div className="w-full bg-black">
+        <div id="sponsors-section" className="w-full bg-black">
             <SponsorList />
         </div>
     );
