@@ -24,6 +24,77 @@ const EventGrid = ({
 }) => {
   const router = useRouter();
   
+  const isTba = (value) => !value || String(value).trim().toLowerCase() === "tba";
+
+  const getOrdinalSuffix = (day) => {
+    const mod100 = day % 100;
+    if (mod100 >= 11 && mod100 <= 13) return "th";
+    switch (day % 10) {
+      case 1:
+        return "st";
+      case 2:
+        return "nd";
+      case 3:
+        return "rd";
+      default:
+        return "th";
+    }
+  };
+
+  const formatEventDate = (rawDate) => {
+    if (isTba(rawDate)) return null;
+    const normalized =
+      typeof rawDate === "object" && rawDate?.$date ? rawDate.$date : rawDate;
+    const d = new Date(normalized);
+    if (Number.isNaN(d.getTime())) return null;
+    const day = d.getDate();
+    const month = new Intl.DateTimeFormat("en-US", { month: "long" }).format(d);
+    return `${day}${getOrdinalSuffix(day)} ${month}`;
+  };
+
+  const parseStartTime = (rawTime) => {
+    if (isTba(rawTime)) return null;
+    const str = String(rawTime).trim();
+
+    // Match first time occurrence: "9:30", "09.30", "9:30 AM", "14:05", etc.
+    const match = str.match(/(\d{1,2})(?:[:.](\d{2}))?\s*([AaPp]\.?\s*[Mm]\.?)?/);
+    if (!match) return null;
+
+    let hour = Number(match[1]);
+    const minute = Number(match[2] ?? "0");
+    let meridiem = match[3] ? match[3].toLowerCase().replace(/\./g, "").replace(/\s+/g, "") : null;
+
+    if (Number.isNaN(hour) || Number.isNaN(minute)) return null;
+
+    // If AM/PM not provided, infer from 24h time when possible
+    if (!meridiem) {
+      if (hour === 0) {
+        meridiem = "am";
+        hour = 12;
+      } else if (hour >= 13) {
+        meridiem = "pm";
+        hour = hour - 12;
+      } else {
+        // default to AM for 1-12 if unknown
+        meridiem = "am";
+      }
+    } else {
+      // Normalize hour based on explicit AM/PM
+      const isPm = meridiem.startsWith("p");
+      const isAm = meridiem.startsWith("a");
+      if (isAm && hour === 12) hour = 12; // 12 AM edge case is ambiguous without date; keep as 12
+      if (isPm && hour > 12) hour = hour; // keep
+    }
+
+    const hh = String(hour).padStart(2, "0");
+    const mm = String(minute).padStart(2, "0");
+    const ampm = meridiem.startsWith("p") ? "PM" : "AM";
+    return `${hh}:${mm} ${ampm}`;
+  };
+
+  const formattedDate = formatEventDate(date);
+  const formattedStartTime = parseStartTime(time);
+
   // Function to get arrow color based on category
   const getCategoryColor = (category) => {
     const categoryLower = category?.toLowerCase() || "";
@@ -42,31 +113,22 @@ const EventGrid = ({
   
   const categoryArrowColor = getCategoryColor(category);
   
-  // Mapping dates to corresponding days
-  const dateToDayMap = {
-    14: "Friday",
-    15: "Saturday",
-    16: "Sunday",
-  };
-
   return (
     <button
       className="group relative transition-all hover:z-30 font-poppins w-full lg:w-[21rem] text-left"
       onClick={() => router.push(to)}
     >
       <div className="hidden lg:block absolute group-hover:shadow-lg opacity-0 -translate-y-20 group-hover:-translate-y-2 group-hover:opacity-100 left-0 top-[100%] w-full group-hover:scale-[110%] bg-gray-200 px-4 pt-2 transition-all ease-in-out">
-        <div className="flex flex-row py-4 text-gray-700 justify-evenly">
-          <div className="pt-2">
-            <p className="font-semibold text-center font-poppins">
-              {date}
-              {date === "23" ? <sup>rd</sup> : <sup>th</sup>} March
+        <div className="flex flex-row items-start justify-between gap-6 py-4 text-gray-700">
+          <div className="min-w-0">
+            <p className="font-semibold font-poppins text-left truncate">
+              {formattedDate || "TBA"}
             </p>
-            <p className="text-center font-poppins font-semibold">{dateToDayMap[date]}</p>
           </div>
-
-          <div className="pt-2">
-            <p className="font-semibold text-center font-poppins">{time}</p>
-            <p className="text-center font-poppins">Time</p>
+          <div className="shrink-0">
+            <p className="font-semibold font-poppins text-right whitespace-nowrap">
+              {formattedStartTime || "TBA"}
+            </p>
           </div>
         </div>
       </div>
@@ -143,32 +205,23 @@ const EventGrid = ({
           <div className="flex flex-row justify-between text-white mt-10 ">
             <div>
               <p className="font-semibold">
-                {date}
-                <sup>th</sup>March
+                {formattedDate || "TBA"}
               </p>
-              <p className="text-center font-poppins font-semibold">{dateToDayMap[date]}</p>
             </div>
             <div>
-              <p className="font-semibold">{time}</p>
-              <p className="text-sm">Time</p>
+              <p className="font-semibold">{formattedStartTime || "TBA"}</p>
             </div>
           </div>
         </div>
 
         <div className="w-full px-4 bg-gray-200 shadow-lg lg:hidden font-poppins">
-          <div className="flex flex-row py-2 text-base text-gray-700 justify-evenly">
-            <div className="pt-2">
-              <p className="font-semibold text-center font-poppins">
-                {date}
-                {date === "23" ? <sup>rd</sup> : <sup>th</sup>} Feb
-              </p>
-              <p className="text-center font-poppins">Date</p>
-            </div>
-
-            <div className="pt-2">
-              <p className="font-semibold text-center font-poppins">{time}</p>
-              <p className="text-center font-poppins">Time</p>
-            </div>
+          <div className="flex flex-row items-start justify-between gap-6 py-3 text-base text-gray-700">
+            <p className="font-semibold text-left font-poppins truncate">
+              {formattedDate || "TBA"}
+            </p>
+            <p className="font-semibold text-right font-poppins whitespace-nowrap">
+              {formattedStartTime || "TBA"}
+            </p>
           </div>
         </div>
       </div>
