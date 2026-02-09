@@ -49,9 +49,13 @@ export default function ProfilePage() {
     const vantaRef = useRef(null);
 
     // Redirect to auth if not authenticated
+    // Use a small delay to allow auth state to stabilize after navigation
     useEffect(() => {
         if (!authLoading && !isAuthenticated) {
-            router.push('/auth?type=login');
+            const timer = setTimeout(() => {
+                router.push('/auth?type=login');
+            }, 100);
+            return () => clearTimeout(timer);
         }
     }, [authLoading, isAuthenticated, router]);
 
@@ -192,121 +196,121 @@ export default function ProfilePage() {
                 </div>
             ) : (
 
-            /* Content */
-            <div className="max-w-4xl mx-auto space-y-6 relative z-10">
+                /* Content */
+                <div className="max-w-4xl mx-auto space-y-6 relative z-10">
 
-                {/* Tab Navigation */}
-                <div className="flex gap-1 border-b border-white/10 mb-2">
-                    <button
-                        onClick={() => setActiveTab("profile")}
-                        className={`px-6 py-3 font-general text-sm uppercase tracking-wider transition-colors ${activeTab === "profile"
-                            ? "text-white border-b-2 border-blue-500"
-                            : "text-gray-500 hover:text-gray-300"
-                            }`}
-                    >
-                        Profile
-                    </button>
-                    <button
-                        onClick={() => setActiveTab("accommodation")}
-                        className={`px-6 py-3 font-general text-sm uppercase tracking-wider transition-colors ${activeTab === "accommodation"
-                            ? "text-white border-b-2 border-blue-500"
-                            : "text-gray-500 hover:text-gray-300"
-                            }`}
-                    >
-                        Accommodation
-                    </button>
-                </div>
+                    {/* Tab Navigation */}
+                    <div className="flex gap-1 border-b border-white/10 mb-2">
+                        <button
+                            onClick={() => setActiveTab("profile")}
+                            className={`px-6 py-3 font-general text-sm uppercase tracking-wider transition-colors ${activeTab === "profile"
+                                ? "text-white border-b-2 border-blue-500"
+                                : "text-gray-500 hover:text-gray-300"
+                                }`}
+                        >
+                            Profile
+                        </button>
+                        <button
+                            onClick={() => setActiveTab("accommodation")}
+                            className={`px-6 py-3 font-general text-sm uppercase tracking-wider transition-colors ${activeTab === "accommodation"
+                                ? "text-white border-b-2 border-blue-500"
+                                : "text-gray-500 hover:text-gray-300"
+                                }`}
+                        >
+                            Accommodation
+                        </button>
+                    </div>
 
-                {activeTab === "profile" && (
-                    <>
-                        {/* Row 1: Profile Header (Full Width) */}
-                        <section>
-                            <ProfileHeader user={userData} />
-                        </section>
+                    {activeTab === "profile" && (
+                        <>
+                            {/* Row 1: Profile Header (Full Width) */}
+                            <section>
+                                <ProfileHeader user={userData} />
+                            </section>
 
-                        {/* Row 2: Stats Row (Horizontal) */}
-                        <section>
-                            <StatsGrid stats={statsData} />
-                        </section>
+                            {/* Row 2: Stats Row (Horizontal) */}
+                            <section>
+                                <StatsGrid stats={statsData} />
+                            </section>
 
-                        {/* Row 3: QR Code + My Workshops (Side by Side) */}
-                        <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                            {/* QR Code Section (Left) */}
-                            <div className="lg:col-span-4">
-                                <QRCodeSection ticketId={userData.kriyaId} />
-                            </div>
-
-                            {/* My Workshops Section (Right) */}
-                            <div className="lg:col-span-8 border border-white/10 bg-white/5 backdrop-blur-md rounded-xl p-5 flex flex-col">
-                                <div className="flex items-end gap-4 mb-4 border-b border-white/10 pb-2">
-                                    <h2 className="special-font text-2xl md:text-3xl uppercase text-white"><b>My Workshops</b></h2>
-                                    <span className="font-general text-xs text-gray-500 mb-1 uppercase tracking-wide">
-                                        {workshops.length} Enrolled
-                                    </span>
+                            {/* Row 3: QR Code + My Workshops (Side by Side) */}
+                            <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                                {/* QR Code Section (Left) */}
+                                <div className="lg:col-span-4">
+                                    <QRCodeSection ticketId={userData.kriyaId} />
                                 </div>
-                                <ScrollableContainer maxHeight="300px">
-                                    {workshops.length > 0 ? (
-                                        workshops.map(workshop => (
-                                            <EventTicket key={workshop.id} event={workshop} />
-                                        ))
-                                    ) : (
-                                        <p className="text-gray-500 font-general text-sm text-center py-8">No workshops enrolled yet</p>
-                                    )}
-                                </ScrollableContainer>
-                            </div>
-                        </section>
 
-                        {/* Row 4: My Events + My Paper Presentations (Side by Side) */}
-                        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            {/* My Events Section */}
-                            <div className={`border border-white/10 bg-white/5 backdrop-blur-md rounded-xl p-5 flex flex-col ${!hasPaperPresentations ? 'lg:col-span-2' : ''}`}>
-                                <div className="flex items-end gap-4 mb-4 border-b border-white/10 pb-2">
-                                    <h2 className="special-font text-2xl md:text-3xl uppercase text-white"><b>My Events</b></h2>
-                                    <span className="font-general text-xs text-gray-500 mb-1 uppercase tracking-wide">
-                                        {events.length} Registered
-                                    </span>
-                                </div>
-                                <ScrollableContainer maxHeight="350px">
-                                    {events.length > 0 ? (
-                                        events.map(event => (
-                                            <EventTicket key={event.id} event={event} />
-                                        ))
-                                    ) : (
-                                        <p className="text-gray-500 font-general text-sm text-center py-8">No events registered yet</p>
-                                    )}
-                                </ScrollableContainer>
-                            </div>
-
-                            {/* My Paper Presentations Section (Only if user has paper presentations) */}
-                            {hasPaperPresentations && (
-                                <div className="border border-white/10 bg-white/5 backdrop-blur-md rounded-xl p-5 flex flex-col">
+                                {/* My Workshops Section (Right) */}
+                                <div className="lg:col-span-8 border border-white/10 bg-white/5 backdrop-blur-md rounded-xl p-5 flex flex-col">
                                     <div className="flex items-end gap-4 mb-4 border-b border-white/10 pb-2">
-                                        <h2 className="special-font text-2xl md:text-3xl uppercase text-white"><b>My Paper Presentations</b></h2>
+                                        <h2 className="special-font text-2xl md:text-3xl uppercase text-white"><b>My Workshops</b></h2>
                                         <span className="font-general text-xs text-gray-500 mb-1 uppercase tracking-wide">
-                                            {papers.length} Submitted
+                                            {workshops.length} Enrolled
+                                        </span>
+                                    </div>
+                                    <ScrollableContainer maxHeight="300px">
+                                        {workshops.length > 0 ? (
+                                            workshops.map(workshop => (
+                                                <EventTicket key={workshop.id} event={workshop} />
+                                            ))
+                                        ) : (
+                                            <p className="text-gray-500 font-general text-sm text-center py-8">No workshops enrolled yet</p>
+                                        )}
+                                    </ScrollableContainer>
+                                </div>
+                            </section>
+
+                            {/* Row 4: My Events + My Paper Presentations (Side by Side) */}
+                            <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                {/* My Events Section */}
+                                <div className={`border border-white/10 bg-white/5 backdrop-blur-md rounded-xl p-5 flex flex-col ${!hasPaperPresentations ? 'lg:col-span-2' : ''}`}>
+                                    <div className="flex items-end gap-4 mb-4 border-b border-white/10 pb-2">
+                                        <h2 className="special-font text-2xl md:text-3xl uppercase text-white"><b>My Events</b></h2>
+                                        <span className="font-general text-xs text-gray-500 mb-1 uppercase tracking-wide">
+                                            {events.length} Registered
                                         </span>
                                     </div>
                                     <ScrollableContainer maxHeight="350px">
-                                        {papers.map(paper => (
-                                            <EventTicket key={paper.id} event={paper} />
-                                        ))}
+                                        {events.length > 0 ? (
+                                            events.map(event => (
+                                                <EventTicket key={event.id} event={event} />
+                                            ))
+                                        ) : (
+                                            <p className="text-gray-500 font-general text-sm text-center py-8">No events registered yet</p>
+                                        )}
                                     </ScrollableContainer>
                                 </div>
-                            )}
+
+                                {/* My Paper Presentations Section (Only if user has paper presentations) */}
+                                {hasPaperPresentations && (
+                                    <div className="border border-white/10 bg-white/5 backdrop-blur-md rounded-xl p-5 flex flex-col">
+                                        <div className="flex items-end gap-4 mb-4 border-b border-white/10 pb-2">
+                                            <h2 className="special-font text-2xl md:text-3xl uppercase text-white"><b>My Paper Presentations</b></h2>
+                                            <span className="font-general text-xs text-gray-500 mb-1 uppercase tracking-wide">
+                                                {papers.length} Submitted
+                                            </span>
+                                        </div>
+                                        <ScrollableContainer maxHeight="350px">
+                                            {papers.map(paper => (
+                                                <EventTicket key={paper.id} event={paper} />
+                                            ))}
+                                        </ScrollableContainer>
+                                    </div>
+                                )}
+                            </section>
+                        </>
+                    )}
+
+                    {activeTab === "accommodation" && (
+                        <section className="min-h-[400px] flex items-center justify-center border border-white/10 rounded-xl bg-white/5 backdrop-blur-md">
+                            <div className="text-center">
+                                <h2 className="font-zentry text-4xl text-white uppercase mb-4">Accommodation</h2>
+                                <p className="font-circular-web text-gray-400">Coming Soon</p>
+                            </div>
                         </section>
-                    </>
-                )}
+                    )}
 
-                {activeTab === "accommodation" && (
-                    <section className="min-h-[400px] flex items-center justify-center border border-white/10 rounded-xl bg-white/5 backdrop-blur-md">
-                        <div className="text-center">
-                            <h2 className="font-zentry text-4xl text-white uppercase mb-4">Accommodation</h2>
-                            <p className="font-circular-web text-gray-400">Coming Soon</p>
-                        </div>
-                    </section>
-                )}
-
-            </div>
+                </div>
             )}
         </div>
     );

@@ -36,9 +36,10 @@ export default function CallbackComponent() {
 
                 if (existingUser) {
                     await googleLogin({ email, googleId, existing_user: true });
-                    // Redirect to callback URL if present, otherwise to profile
+                    // Wait for state to settle before navigation (similar to normal login)
+                    // Use replace instead of push to prevent back-button issues
                     const callbackUrl = searchParams.get('callbackUrl');
-                    router.push(callbackUrl || '/profile');
+                    router.replace(callbackUrl || '/profile');
                 } else {
                     localStorage.setItem('registration_email', email);
                     localStorage.setItem('registration_googleId', googleId);
