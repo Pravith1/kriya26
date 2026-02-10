@@ -39,13 +39,14 @@ const transformEvent = (item, itemType) => ({
 
 export default function ProfilePage() {
     const router = useRouter();
-    const { user, loading: authLoading, isAuthenticated } = useAuth();
+    const { user, loading: authLoading, isAuthenticated, logout } = useAuth();
     const [activeTab, setActiveTab] = useState("profile");
     const [events, setEvents] = useState([]);
     const [workshops, setWorkshops] = useState([]);
     const [papers, setPapers] = useState([]);
     const [dataLoading, setDataLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
     const vantaRef = useRef(null);
 
     // Redirect to auth if not authenticated
@@ -180,6 +181,17 @@ export default function ProfilePage() {
 
     const isLoading = authLoading || (isAuthenticated && dataLoading);
 
+    const handleLogout = async () => {
+        if (isLoggingOut) return;
+        setIsLoggingOut(true);
+        try {
+            await logout();
+            router.push('/auth?type=login');
+        } finally {
+            setIsLoggingOut(false);
+        }
+    };
+
     return (
         <div className="min-h-screen w-full bg-black text-white pt-28 pb-20 px-4 md:px-8 lg:px-12 relative">
             {!isLoading && <Navbar />}
@@ -200,25 +212,38 @@ export default function ProfilePage() {
                 <div className="max-w-4xl mx-auto space-y-6 relative z-10">
 
                     {/* Tab Navigation */}
-                    <div className="flex gap-1 border-b border-white/10 mb-2">
-                        <button
-                            onClick={() => setActiveTab("profile")}
-                            className={`px-6 py-3 font-general text-sm uppercase tracking-wider transition-colors ${activeTab === "profile"
-                                ? "text-white border-b-2 border-blue-500"
-                                : "text-gray-500 hover:text-gray-300"
-                                }`}
-                        >
-                            Profile
-                        </button>
-                        <button
-                            onClick={() => setActiveTab("accommodation")}
-                            className={`px-6 py-3 font-general text-sm uppercase tracking-wider transition-colors ${activeTab === "accommodation"
-                                ? "text-white border-b-2 border-blue-500"
-                                : "text-gray-500 hover:text-gray-300"
-                                }`}
-                        >
-                            Accommodation
-                        </button>
+                    <div className="flex items-center justify-between border-b border-white/10 mb-2">
+                        <div className="flex gap-1">
+                            <button
+                                onClick={() => setActiveTab("profile")}
+                                className={`px-6 py-3 font-general text-sm uppercase tracking-wider transition-colors ${activeTab === "profile"
+                                    ? "text-white border-b-2 border-blue-500"
+                                    : "text-gray-500 hover:text-gray-300"
+                                    }`}
+                            >
+                                Profile
+                            </button>
+                            <button
+                                onClick={() => setActiveTab("accommodation")}
+                                className={`px-6 py-3 font-general text-sm uppercase tracking-wider transition-colors ${activeTab === "accommodation"
+                                    ? "text-white border-b-2 border-blue-500"
+                                    : "text-gray-500 hover:text-gray-300"
+                                    }`}
+                            >
+                                Accommodation
+                            </button>
+                        </div>
+
+                        {isAuthenticated && (
+                            <button
+                                type="button"
+                                onClick={handleLogout}
+                                disabled={isLoggingOut}
+                                className="mr-2 md:mr-0 mb-1 px-4 py-2 rounded-lg border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-200 font-general text-xs uppercase tracking-wider transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                            >
+                                {isLoggingOut ? "Logging out..." : "Logout"}
+                            </button>
+                        )}
                     </div>
 
                     {activeTab === "profile" && (
