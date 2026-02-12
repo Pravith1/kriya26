@@ -8,105 +8,99 @@ import { TiLocationArrow, TiUser } from "react-icons/ti";
 import { FaEnvelope, FaLinkedin, FaInstagram } from "react-icons/fa";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { useExternalScript } from "../hooks/useExternalScript";
-import Button from "./Button";
 
-gsap.registerPlugin(ScrollTrigger);
+import Button from "./Button";
 
 const Hero = () => {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const vantaRef = useRef(null);
-  const vantaEffectRef = useRef(null);
-  const [isVisible, setIsVisible] = useState(false);
-
-  const threeStatus = useExternalScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js');
-  const vantaStatus = useExternalScript(threeStatus === 'ready' ? 'https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.rings.min.js' : null);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsVisible(entry.isIntersecting);
-      },
-      { threshold: 0.1 }
-    );
+    let vantaEffect = null;
+    let isMounted = true;
 
-    if (vantaRef.current) {
-      observer.observe(vantaRef.current);
-    }
+    const loadVanta = async () => {
+      if (typeof window !== 'undefined') {
+        // Load THREE.js if not present
+        if (!window.THREE) {
+          const threeScript = document.createElement('script');
+          threeScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r121/three.min.js';
+          document.head.appendChild(threeScript);
+
+          await new Promise((resolve) => {
+            threeScript.onload = resolve;
+          });
+        }
+
+        // Load Vanta Rings if not present (check for RINGS specifically, not just VANTA)
+        if (!window.VANTA?.RINGS) {
+          const vantaScript = document.createElement('script');
+          vantaScript.src = 'https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.rings.min.js';
+          document.head.appendChild(vantaScript);
+
+          await new Promise((resolve) => {
+            vantaScript.onload = resolve;
+          });
+        }
+
+        // Wait a frame to ensure DOM is ready and scripts are fully initialized
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+
+        // Initialize Vanta effect only if component is still mounted
+        if (isMounted && window.VANTA?.RINGS && vantaRef.current) {
+          vantaEffect = window.VANTA.RINGS({
+            el: vantaRef.current,
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: 200.00,
+            minWidth: 200.00,
+            scale: 1.00,
+            scaleMobile: 1.00,
+            backgroundColor: 0x50707,
+            color: 0x939236,
+            xyTurbulence: 0.75,
+            rotationX: 0.5,
+            rotationY: 0.5
+          });
+        }
+      }
+    };
+
+    loadVanta();
 
     return () => {
-      if (vantaRef.current) {
-        observer.unobserve(vantaRef.current);
-      }
+      isMounted = false;
+      if (vantaEffect) vantaEffect.destroy();
     };
   }, []);
 
-  useEffect(() => {
-    if (threeStatus === 'ready' && vantaStatus === 'ready' && vantaRef.current) {
-      if (isVisible && !vantaEffectRef.current) {
-        vantaEffectRef.current = window.VANTA.RINGS({
-          el: vantaRef.current,
-          THREE: window.THREE,
-          mouseControls: true,
-          touchControls: true,
-          gyroControls: false,
-          minHeight: 200.00,
-          minWidth: 200.00,
-          scale: 1.00,
-          scaleMobile: 1.00,
-          backgroundColor: 0x50707,
-          color: 0x939236,
-          xyTurbulence: 0.75,
-          rotationX: 0.5,
-          rotationY: 0.5
-        });
-      } else if (!isVisible && vantaEffectRef.current) {
-        vantaEffectRef.current.destroy();
-        vantaEffectRef.current = null;
-      }
-    }
-
-    return () => {
-      if (vantaEffectRef.current) {
-        vantaEffectRef.current.destroy();
-        vantaEffectRef.current = null;
-      }
-    };
-  }, [threeStatus, vantaStatus, isVisible]);
-
   useGSAP(() => {
-    // Wait for Vanta to be ready and DOM element to exist
-    const heroFrame = document.querySelector("#hero-frame");
-    if (vantaStatus !== 'ready' || !heroFrame) return;
-
-    // Set initial state
     gsap.set("#hero-frame", {
       clipPath: "polygon(14% 0, 72% 0, 88% 90%, 0 95%)",
       borderRadius: "0% 0% 40% 10%",
     });
-
-    // Animate on scroll
     gsap.from("#hero-frame", {
       clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
       borderRadius: "0% 0% 0% 0%",
       ease: "power1.inOut",
       scrollTrigger: {
         trigger: "#hero-frame",
-        start: "top top",
+        start: "center center",
         end: "bottom center",
         scrub: true,
-        invalidateOnRefresh: true,
-        markers: false, // Set to true for debugging
       },
     });
-
-    // Refresh after a short delay to ensure layout is complete
-    setTimeout(() => ScrollTrigger.refresh(), 100);
-  }, { dependencies: [vantaStatus] });
+  });
 
   return (
     <div id="hero-frame" className="relative h-dvh w-full overflow-x-hidden rounded-lg">
+      {/* Background 2026 Text */}
+      {/* <h1 className="special-font absolute z-0 font-zentry text-[3rem] sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-[7rem] font-thin uppercase bottom-15 right-15 text-black/30 hidden lg:block">
+        20<b>2</b>6
+      </h1> */}
+
       <div
         ref={vantaRef}
         className="absolute inset-0 z-10"
@@ -115,6 +109,10 @@ const Hero = () => {
       {/* Mobile Layout */}
       <div className="absolute bg-black/50 inset-0 z-20 flex lg:hidden justify-center items-center px-4 py-8 pointer-events-none">
         <div className="rounded-3xl p-6 mt-22 text-center w-full max-w-md mx-auto relative">
+          {/* <h1 className="special-font font-zentry text-4xl font-thin uppercase absolute top-4 right-4 z-40 text-white">
+            20<b>2</b>6
+          </h1> */}
+
           <Image
             src="/Logo/kriya26white.png"
             alt="Kriya 2026 Logo"
@@ -168,7 +166,7 @@ const Hero = () => {
           <div className="mb-6">
             <div className="flex items-center justify-center gap-2 text-5xl text-white font-zentry bg-black/50 p-2 py-1 rounded-xl">
               <h2 className="special-font font-zentry font-thin uppercase text-white bg-clip-text text-transparent">
-                <span className="">Ma<b>r</b>c<b>h</b></span>
+                <span className="bg-black/50 p-2 py-1 rounded-xl">Ma<b>r</b>c<b>h</b></span>
               </h2>
               <span className="text-blue-400 ">14</span>
               <span className="text-purple-400">,</span>
@@ -197,6 +195,11 @@ const Hero = () => {
 
       {/* Desktop Layout */}
       <div className="absolute inset-0 z-20 p-20 bg-black/50 hidden lg:flex flex-row justify-center items-center gap-10 pointer-events-none">
+
+        {/* <h1 className="special-font font-zentry text-[3rem] sm:text-5xl md:text-6xl lg:text-7xl xl:text-10xl 2xl:text-[7rem] font-zentry font-thin uppercase absolute bottom-5 right-5 z-40 text-[#dfdff2]">
+          20<b>2</b>6
+        </h1> */}
+
         <div className="rounded-3xl p-6 md:p-8 text-center">
           <Image
             src="/Logo/kriya26white.png"

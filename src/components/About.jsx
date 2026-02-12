@@ -3,7 +3,6 @@
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/all";
-import { useEffect, useState } from "react";
 
 import AnimatedTitle from "./AnimatedTitle";
 import VantaBackground from "./ui/VantaBackground";
@@ -11,41 +10,11 @@ import VantaBackground from "./ui/VantaBackground";
 gsap.registerPlugin(ScrollTrigger);
 
 const About = () => {
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    // Mark component as mounted after a brief delay to ensure DOM is stable
-    const timer = setTimeout(() => {
-      setIsMounted(true);
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, []);
-
   useGSAP(() => {
-    // Wait for component to be mounted
-    if (!isMounted) return;
+    const mm = ScrollTrigger.matchMedia();
 
-    // Wait for elements to exist in DOM
-    const clipSection = document.querySelector("#clip");
-    const prizeCard = document.querySelector(".prize-pool-card");
-
-    if (!clipSection || !prizeCard) {
-      console.warn("Prize pool elements not found, retrying...");
-      return;
-    }
-
-    let mm = gsap.matchMedia();
-
+    // Desktop/tablet: keep the zoom (text scale) animation
     mm.add("(min-width: 768px)", () => {
-      // Set initial states explicitly
-      gsap.set(".prize-pool-card", {
-        width: "70vw",
-        height: "70vh",
-        borderRadius: "20px",
-      });
-      gsap.set(".prize-pool-text", { scale: 1 });
-
       const clipAnimation = gsap.timeline({
         scrollTrigger: {
           trigger: "#clip",
@@ -54,8 +23,6 @@ const About = () => {
           scrub: 0.5,
           pin: true,
           pinSpacing: true,
-          invalidateOnRefresh: true,
-          markers: false, // Set to true for debugging
         },
       });
 
@@ -75,14 +42,9 @@ const About = () => {
       );
     });
 
-    // Mobile version
+    // Mobile: remove the prize pool "zoom" (text scaling) animation
     mm.add("(max-width: 767px)", () => {
-      // Set initial states explicitly
-      gsap.set(".prize-pool-card", {
-        width: "70vw",
-        height: "70vh",
-        borderRadius: "20px",
-      });
+      // Ensure text is not scaled on mobile
       gsap.set(".prize-pool-text", { scale: 1 });
 
       const clipAnimation = gsap.timeline({
@@ -93,8 +55,6 @@ const About = () => {
           scrub: 0.5,
           pin: true,
           pinSpacing: true,
-          invalidateOnRefresh: true,
-          markers: false,
         },
       });
 
@@ -103,31 +63,30 @@ const About = () => {
         height: "100vh",
         borderRadius: 0,
       });
+
       clipAnimation.to(
         ".prize-pool-text",
         {
-          scale: 2, // Grow the text size
+          scale: 2.0, // Grow the text size
         },
         0 // Start at the same time as image expansion
       );
     });
 
-    // Force a refresh after layout is settled and animations are created
-    const refreshTimer = setTimeout(() => {
-      ScrollTrigger.refresh();
-    }, 100);
-
-    return () => {
-      clearTimeout(refreshTimer);
-      mm.revert();
-    };
-  }, [isMounted]);
+    return () => mm.revert();
+  });
 
   return (
     <>
       <section id='clip' className="prize-section min-h-screen w-full bg-white flex justify-center items-center overflow-hidden">
         <div
-          className="prize-pool-card relative bg-gray-900 flex justify-center items-center overflow-hidden"
+          className="prize-pool-card relative bg-gray-900 flex justify-center items-center"
+          style={{
+            width: "70vw",
+            height: "70vh",
+            borderRadius: "20px",
+            overflow: "hidden",
+          }}
         >
           <VantaBackground>
             <div className="prize-pool-text bg-black/50 xl:bg-transparent w-full absolute inset-0 flex flex-col justify-center items-center text-center">
