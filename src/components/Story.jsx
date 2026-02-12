@@ -3,6 +3,7 @@ import gsap from "gsap";
 import { useRef, useState, useCallback, useEffect } from "react";
 import { motion, useInView } from "framer-motion";
 import { eventService } from "../services/eventservice";
+import { useExternalScript } from "@/hooks/useExternalScript";
 
 const STATIC_IMAGES = [
   "/img/flagship/fl1.png",
@@ -98,7 +99,6 @@ const FloatingImage = () => {
       try {
         const eventPromises = FLAGSHIP_EVENT_IDS.map(id => eventService.getEventById(id));
         const responses = await Promise.all(eventPromises);
-        console.log("Flagship Event Details:", responses);
 
         // Extract and format event data
         const processedEvents = responses.map((res, index) => {
@@ -335,60 +335,62 @@ const FloatingImage = () => {
 
   // Vanta Trunk Background Effect
   const vantaRef = useRef(null);
+  const vantaEffectRef = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  const p5Status = useExternalScript('https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js');
+  const vantaStatus = useExternalScript('https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.trunk.min.js');
 
   useEffect(() => {
-    let vantaEffect = null;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+      },
+      { threshold: 0.1 }
+    );
 
-    const loadVanta = async () => {
-      if (typeof window !== 'undefined') {
-        // Load p5.js (required for TRUNK effect)
-        if (!window.p5) {
-          const p5Script = document.createElement('script');
-          p5Script.src = 'https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js';
-          document.head.appendChild(p5Script);
-
-          await new Promise((resolve) => {
-            p5Script.onload = resolve;
-          });
-        }
-
-        // Load Vanta Trunk
-        if (!window.VANTA || !window.VANTA.TRUNK) {
-          const vantaScript = document.createElement('script');
-          vantaScript.src = 'https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.trunk.min.js';
-          document.head.appendChild(vantaScript);
-
-          await new Promise((resolve) => {
-            vantaScript.onload = resolve;
-          });
-        }
-
-        // Initialize Vanta effect
-        if (window.VANTA && window.VANTA.TRUNK && vantaRef.current) {
-          vantaEffect = window.VANTA.TRUNK({
-            el: vantaRef.current,
-            mouseControls: true,
-            touchControls: true,
-            gyroControls: false,
-            minHeight: 200.00,
-            minWidth: 200.00,
-            scale: 1.00,
-            scaleMobile: 1.00,
-            color: 0x1352c5,
-            backgroundColor: 0xffffff,
-            spacing: 10.00,
-            chaos: 3.00
-          });
-        }
-      }
-    };
-
-    loadVanta();
+    if (vantaRef.current) {
+      observer.observe(vantaRef.current);
+    }
 
     return () => {
-      if (vantaEffect) vantaEffect.destroy();
+      if (vantaRef.current) {
+        observer.unobserve(vantaRef.current);
+      }
     };
   }, []);
+
+  useEffect(() => {
+    if (p5Status === 'ready' && vantaStatus === 'ready' && vantaRef.current) {
+      if (isVisible && !vantaEffectRef.current) {
+        vantaEffectRef.current = window.VANTA.TRUNK({
+          el: vantaRef.current,
+          p5: window.p5,
+          mouseControls: true,
+          touchControls: true,
+          gyroControls: false,
+          minHeight: 200.00,
+          minWidth: 200.00,
+          scale: 1.00,
+          scaleMobile: 1.00,
+          color: 0x1352c5,
+          backgroundColor: 0xffffff,
+          spacing: 10.00,
+          chaos: 3.00
+        });
+      } else if (!isVisible && vantaEffectRef.current) {
+        vantaEffectRef.current.destroy();
+        vantaEffectRef.current = null;
+      }
+    }
+
+    return () => {
+      if (vantaEffectRef.current) {
+        vantaEffectRef.current.destroy();
+        vantaEffectRef.current = null;
+      }
+    };
+  }, [p5Status, vantaStatus, isVisible]);
 
   // Get current front card for indicators
   const currentIndex = orderRef.current[0] || 0;

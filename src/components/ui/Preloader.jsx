@@ -12,12 +12,10 @@ const Preloader = ({ onComplete, finished = false }) => {
     const [fontLoaded, setFontLoaded] = useState(false);
 
     useEffect(() => {
-        // Specifically wait for the zentry font to avoid font-swap flash
         if (typeof document !== 'undefined' && 'fonts' in document) {
             document.fonts.load('1rem zentry').then(() => {
                 setFontLoaded(true);
             }).catch(() => {
-                // Fallback in case of error
                 setFontLoaded(true);
             });
         } else {
@@ -26,8 +24,6 @@ const Preloader = ({ onComplete, finished = false }) => {
     }, []);
 
     useEffect(() => {
-        if (!fontLoaded) return;
-
         // Horizontal wave movement - always active
         gsap.to(waveRef.current, {
             x: "-50%",
@@ -40,27 +36,30 @@ const Preloader = ({ onComplete, finished = false }) => {
         const tl = gsap.timeline();
         timelineRef.current = tl;
 
-        // 1. Snappier Text Reveal
-        tl.fromTo(contentRef.current,
-            { opacity: 0, y: 15 },
-            { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }
-        );
+        // 1. Instant Text Reveal & Start Fill
+        tl.to(contentRef.current, { opacity: 1, duration: 0.3 });
 
-        // 2. Initial Fill (Rise to ~80%)
-        tl.to(waveRef.current, {
-            y: "-80%",
-            duration: 2.5,
-            ease: "power1.inOut",
-            onUpdate: function () {
-                const currentY = parseFloat(gsap.getProperty(waveRef.current, "y"));
-                const p = Math.min(95, Math.abs(currentY));
-                setPercent(Math.round(p));
+        // 2. Initial Fill (Synchronized)
+        // Adjusting starting y to move wave into view sooner
+        tl.fromTo(waveRef.current,
+            { y: 30 }, // Start with wave slightly lower so peak is at bottom
+            {
+                y: "-100",
+                duration: 3,
+                ease: "power1.inOut",
+                onUpdate: function () {
+                    // Normalize percentage: y goes from 30 to -100 (range of 130)
+                    const currentY = gsap.getProperty(waveRef.current, "y");
+                    const progress = (30 - currentY) / 130;
+                    const p = Math.min(100, Math.max(0, progress * 100));
+                    setPercent(Math.round(p));
+                }
             }
-        });
+        );
 
         // 3. Continuous Vertical Oscillation (Floating state)
         tl.to(waveRef.current, {
-            y: "-65%",
+            y: "+=10",
             duration: 2,
             repeat: -1,
             yoyo: true,
@@ -71,7 +70,7 @@ const Preloader = ({ onComplete, finished = false }) => {
             gsap.killTweensOf("*");
             if (timelineRef.current) timelineRef.current.kill();
         };
-    }, [fontLoaded]);
+    }, []);
 
     // Handle exit when finished prop becomes true
     useEffect(() => {

@@ -6,16 +6,16 @@ import Hero from "@/components/Hero";
 import CountDown from "@/components/Countdown";
 import Preloader from "@/components/ui/Preloader";
 
-const StatsSection = dynamic(() => import("@/components/StatsSection"));
-const PrizePool = dynamic(() => import("@/components/About"));
-const Flagship = dynamic(() => import("@/components/Story"));
-const Events = dynamic(() => import("@/components/Features"));
-const Workshops = dynamic(() => import("@/components/Workshop"));
-const PaperPresentation = dynamic(() => import("@/components/PaperPresentation"));
-const Sponsors = dynamic(() => import("@/components/Sponsors"));
-const Team = dynamic(() => import("@/components/Team"));
-const Faq = dynamic(() => import("@/components/Faq"));
-const Contact = dynamic(() => import("@/components/Contact"));
+const StatsSection = React.memo(dynamic(() => import("@/components/StatsSection")));
+const PrizePool = React.memo(dynamic(() => import("@/components/About")));
+const Flagship = React.memo(dynamic(() => import("@/components/Story")));
+const Events = React.memo(dynamic(() => import("@/components/Features")));
+const Workshops = React.memo(dynamic(() => import("@/components/Workshop")));
+const PaperPresentation = React.memo(dynamic(() => import("@/components/PaperPresentation")));
+const Sponsors = React.memo(dynamic(() => import("@/components/Sponsors")));
+const Team = React.memo(dynamic(() => import("@/components/Team")));
+const Faq = React.memo(dynamic(() => import("@/components/Faq")));
+const Contact = React.memo(dynamic(() => import("@/components/Contact")));
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
