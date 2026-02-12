@@ -3,131 +3,103 @@
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/all";
-import { useEffect, useState } from "react";
 
 import AnimatedTitle from "./AnimatedTitle";
 import VantaBackground from "./ui/VantaBackground";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const About = () => {
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    // Mark component as mounted after a brief delay to ensure DOM is stable
-    const timer = setTimeout(() => {
-      setIsMounted(true);
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, []);
-
+const About = ({ preloaderComplete = true }) => {
   useGSAP(() => {
-    // Wait for component to be mounted
-    if (!isMounted) return;
+    // Only initialize GSAP animations after preloader completes
+    if (!preloaderComplete) return;
 
-    // Wait for elements to exist in DOM
-    const clipSection = document.querySelector("#clip");
-    const prizeCard = document.querySelector(".prize-pool-card");
+    // Add a delay to ensure DOM is ready and preloader is fully removed
+    const initTimer = setTimeout(() => {
+      const mm = ScrollTrigger.matchMedia();
 
-    if (!clipSection || !prizeCard) {
-      console.warn("Prize pool elements not found, retrying...");
-      return;
-    }
+      // Desktop/tablet: keep the zoom (text scale) animation
+      mm.add("(min-width: 768px)", () => {
+        const clipAnimation = gsap.timeline({
+          scrollTrigger: {
+            trigger: "#clip",
+            start: "center center",
+            end: "+=800 center",
+            scrub: 0.5,
+            pin: true,
+            pinSpacing: true,
+          },
+        });
 
-    let mm = gsap.matchMedia();
+        clipAnimation.to(".prize-pool-card", {
+          width: "100vw",
+          height: "100vh",
+          borderRadius: 0,
+        });
 
-    mm.add("(min-width: 768px)", () => {
-      // Set initial states explicitly
-      gsap.set(".prize-pool-card", {
-        width: "70vw",
-        height: "70vh",
-        borderRadius: "20px",
-      });
-      gsap.set(".prize-pool-text", { scale: 1 });
-
-      const clipAnimation = gsap.timeline({
-        scrollTrigger: {
-          trigger: "#clip",
-          start: "center center",
-          end: "+=800 center",
-          scrub: 0.5,
-          pin: true,
-          pinSpacing: true,
-          invalidateOnRefresh: true,
-          markers: false, // Set to true for debugging
-        },
-      });
-
-      clipAnimation.to(".prize-pool-card", {
-        width: "100vw",
-        height: "100vh",
-        borderRadius: 0,
+        // Animate the prize pool text to grow as the image expands
+        clipAnimation.to(
+          ".prize-pool-text",
+          {
+            scale: 2.0, // Grow the text size
+          },
+          0 // Start at the same time as image expansion
+        );
       });
 
-      // Animate the prize pool text to grow as the image expands
-      clipAnimation.to(
-        ".prize-pool-text",
-        {
-          scale: 2.0, // Grow the text size
-        },
-        0 // Start at the same time as image expansion
-      );
-    });
+      // Mobile: remove the prize pool "zoom" (text scaling) animation
+      mm.add("(max-width: 767px)", () => {
+        // Ensure text is not scaled on mobile
+        gsap.set(".prize-pool-text", { scale: 1 });
 
-    // Mobile version
-    mm.add("(max-width: 767px)", () => {
-      // Set initial states explicitly
-      gsap.set(".prize-pool-card", {
-        width: "70vw",
-        height: "70vh",
-        borderRadius: "20px",
-      });
-      gsap.set(".prize-pool-text", { scale: 1 });
+        const clipAnimation = gsap.timeline({
+          scrollTrigger: {
+            trigger: "#clip",
+            start: "center center",
+            end: "+=800 center",
+            scrub: 0.5,
+            pin: true,
+            pinSpacing: true,
+          },
+        });
 
-      const clipAnimation = gsap.timeline({
-        scrollTrigger: {
-          trigger: "#clip",
-          start: "center center",
-          end: "+=800 center",
-          scrub: 0.5,
-          pin: true,
-          pinSpacing: true,
-          invalidateOnRefresh: true,
-          markers: false,
-        },
+        clipAnimation.to(".prize-pool-card", {
+          width: "100vw",
+          height: "100vh",
+          borderRadius: 0,
+        });
+
+        clipAnimation.to(
+          ".prize-pool-text",
+          {
+            scale: 2.0, // Grow the text size
+          },
+          0 // Start at the same time as image expansion
+        );
       });
 
-      clipAnimation.to(".prize-pool-card", {
-        width: "100vw",
-        height: "100vh",
-        borderRadius: 0,
-      });
-      clipAnimation.to(
-        ".prize-pool-text",
-        {
-          scale: 2, // Grow the text size
-        },
-        0 // Start at the same time as image expansion
-      );
-    });
-
-    // Force a refresh after layout is settled and animations are created
-    const refreshTimer = setTimeout(() => {
+      // Refresh ScrollTrigger after setup
       ScrollTrigger.refresh();
-    }, 100);
+
+      return () => mm.revert();
+    }, 300); // Increased delay to ensure preloader is fully done
 
     return () => {
-      clearTimeout(refreshTimer);
-      mm.revert();
+      clearTimeout(initTimer);
     };
-  }, [isMounted]);
+  }, [preloaderComplete]);
 
   return (
     <>
       <section id='clip' className="prize-section min-h-screen w-full bg-white flex justify-center items-center overflow-hidden">
         <div
-          className="prize-pool-card relative bg-gray-900 flex justify-center items-center overflow-hidden"
+          className="prize-pool-card relative bg-gray-900 flex justify-center items-center"
+          style={{
+            width: "70vw",
+            height: "70vh",
+            borderRadius: "20px",
+            overflow: "hidden",
+          }}
         >
           <VantaBackground>
             <div className="prize-pool-text bg-black/50 xl:bg-transparent w-full absolute inset-0 flex flex-col justify-center items-center text-center">

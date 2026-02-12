@@ -43,10 +43,10 @@ export default function Home() {
         />
       )}
       <Navbar />
-      <Hero />
+      <Hero preloaderComplete={!isLoading} />
       <CountDown />
       <StatsSection />
-      <PrizePool />
+      <PrizePool preloaderComplete={!isLoading} />
       <Flagship />
       <Events />
       <Workshops />
