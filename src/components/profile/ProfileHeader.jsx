@@ -3,8 +3,9 @@ import React from "react";
 import Image from "next/image";
 import Button from "../Button";
 import { TiEdit } from "react-icons/ti";
+import { IoLogOut } from "react-icons/io5";
 
-const ProfileHeader = ({ user }) => {
+const ProfileHeader = ({ user, onLogout, isLoggingOut }) => {
     // State management for user details
     const [name, setName] = React.useState(user?.name || "KRIYA USER");
     const [kriyaId, setKriyaId] = React.useState(user?.kriyaId || "KRIYA-26-0000");
@@ -78,17 +79,39 @@ const ProfileHeader = ({ user }) => {
                 </div>
             </div>
 
-            {/* Action Button - Positioned at top right */}
-            <div className="absolute top-4 right-4 md:top-6 md:right-6">
-                {/* Mobile: Icon only */}
+            {/* Action Buttons - Positioned at top right */}
+            <div className="absolute top-4 right-4 md:top-6 md:right-6 flex items-center gap-2">
+                {/* Logout Button */}
                 <div className="md:hidden">
+                    {/* Mobile: Icon only */}
+                    <Button
+                        onClick={onLogout}
+                        containerClass="!bg-red-500/10 !text-red-200 hover:!bg-red-500/20 border border-red-500/30 !px-3 !py-3 disabled:opacity-60 disabled:cursor-not-allowed"
+                        leftIcon={<IoLogOut className="text-lg" />}
+                        id="logout-btn"
+                    />
+                </div>
+                <div className="hidden md:block">
+                    {/* Desktop: Icon + Text */}
+                    <Button
+                        title={isLoggingOut ? "Logging out..." : "Logout"}
+                        onClick={onLogout}
+                        containerClass="!bg-red-500/10 !text-red-200 hover:!bg-red-500/20 border border-red-500/30 disabled:opacity-60 disabled:cursor-not-allowed"
+                        leftIcon={<IoLogOut />}
+                        id="logout-btn"
+                    />
+                </div>
+
+                {/* Edit Profile Button */}
+                <div className="md:hidden">
+                    {/* Mobile: Icon only */}
                     <Button
                         containerClass="!bg-white/10 !text-white hover:!bg-white/20 border border-white/10 !px-3 !py-3"
                         leftIcon={<TiEdit className="text-lg" />}
                     />
                 </div>
-                {/* Desktop: Icon + Text */}
                 <div className="hidden md:block">
+                    {/* Desktop: Icon + Text */}
                     <Button
                         title="Edit Profile"
                         containerClass="!bg-white/10 !text-white hover:!bg-white/20 border border-white/10"
