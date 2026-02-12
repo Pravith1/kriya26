@@ -49,7 +49,7 @@ const ANIMATION_CONFIG = {
 const CARD_DISTANCE = 60;
 const VERTICAL_DISTANCE = 30; // Reduced to prevent header overlap
 const SKEW_AMOUNT = 3;
-const AUTO_SWAP_DELAY = 1000;
+const AUTO_SWAP_PAUSE_MS = 1000;
 
 // Calculate slot position for each card in the stack
 // Cards stack to the right and slightly down (behind)
@@ -77,7 +77,6 @@ const placeNow = (el, slot, skew, totalCards) =>
   });
 
 const FloatingImage = () => {
-  const [isAnimating, setIsAnimating] = useState(false);
   const [events, setEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const cardsRef = useRef([]);
@@ -87,7 +86,7 @@ const FloatingImage = () => {
   // Order tracking - which card is in which position
   const orderRef = useRef([]);
   const tlRef = useRef(null);
-  const intervalRef = useRef(null);
+  const autoTimeoutRef = useRef(null);
 
   // Touch handling for mobile swipe
   const touchStartX = useRef(0);
@@ -141,19 +140,32 @@ const FloatingImage = () => {
     });
   }, [events]);
 
+  // Finish any running animation so order is consistent
+  const finalizeCurrentTimeline = useCallback(() => {
+    if (!tlRef.current) return;
+    const tl = tlRef.current;
+    tl.progress(1);
+    tl.kill();
+    tlRef.current = null;
+  }, []);
+
   // Swap animation - front card drops and returns to back
   const swap = useCallback(() => {
-    if (orderRef.current.length < 2 || isAnimating) return;
-    setIsAnimating(true);
+    if (orderRef.current.length < 2) return;
+
+    // If already animating, finish it so order stays correct
+    finalizeCurrentTimeline();
 
     const [front, ...rest] = orderRef.current;
     const elFront = cardsRef.current[front];
     if (!elFront) return;
 
+    const newOrder = [...rest, front];
+
     const tl = gsap.timeline({
       onComplete: () => {
-        orderRef.current = [...rest, front];
-        setIsAnimating(false);
+        orderRef.current = newOrder;
+        tlRef.current = null;
       }
     });
     tlRef.current = tl;
@@ -206,19 +218,32 @@ const FloatingImage = () => {
       },
       'return'
     );
-  }, [isAnimating, events.length]);
+  }, [events.length, finalizeCurrentTimeline]);
 
-  // Auto-swap interval - works on both mobile and desktop
+  // Auto-swap with pause after animation completes
   useEffect(() => {
-    // Start auto-swap interval
-    intervalRef.current = setInterval(() => {
-      swap();
-    }, AUTO_SWAP_DELAY);
+    const waitForIdleThenPause = () => {
+      if (tlRef.current) {
+        autoTimeoutRef.current = setTimeout(waitForIdleThenPause, 200);
+        return;
+      }
+
+      autoTimeoutRef.current = setTimeout(() => {
+        if (tlRef.current) {
+          waitForIdleThenPause();
+          return;
+        }
+        swap();
+        waitForIdleThenPause();
+      }, AUTO_SWAP_PAUSE_MS);
+    };
+
+    waitForIdleThenPause();
 
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
+      if (autoTimeoutRef.current) {
+        clearTimeout(autoTimeoutRef.current);
+        autoTimeoutRef.current = null;
       }
     };
   }, [swap]);
@@ -230,18 +255,22 @@ const FloatingImage = () => {
 
   // Navigate to previous slide (manual) - reverse animation
   const prevSlide = useCallback(() => {
-    if (orderRef.current.length < 2 || isAnimating) return;
-    setIsAnimating(true);
+    if (orderRef.current.length < 2) return;
+
+    // If already animating, finish it so order stays correct
+    finalizeCurrentTimeline();
 
     const order = orderRef.current;
     const back = order[order.length - 1];
     const elBack = cardsRef.current[back];
     if (!elBack) return;
 
+    const newOrder = [back, ...order.slice(0, -1)];
+
     const tl = gsap.timeline({
       onComplete: () => {
-        orderRef.current = [back, ...order.slice(0, -1)];
-        setIsAnimating(false);
+        orderRef.current = newOrder;
+        tlRef.current = null;
       }
     });
     tlRef.current = tl;
@@ -280,7 +309,7 @@ const FloatingImage = () => {
         `demote+=${i * 0.15}`
       );
     });
-  }, [isAnimating, events.length]);
+  }, [events.length, finalizeCurrentTimeline]);
 
   // Touch handlers for mobile swipe
   const handleTouchStart = (e) => {
@@ -304,18 +333,76 @@ const FloatingImage = () => {
     }
   };
 
+  // Vanta Trunk Background Effect
+  const vantaRef = useRef(null);
+
+  useEffect(() => {
+    let vantaEffect = null;
+
+    const loadVanta = async () => {
+      if (typeof window !== 'undefined') {
+        // Load p5.js (required for TRUNK effect)
+        if (!window.p5) {
+          const p5Script = document.createElement('script');
+          p5Script.src = 'https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js';
+          document.head.appendChild(p5Script);
+
+          await new Promise((resolve) => {
+            p5Script.onload = resolve;
+          });
+        }
+
+        // Load Vanta Trunk
+        if (!window.VANTA || !window.VANTA.TRUNK) {
+          const vantaScript = document.createElement('script');
+          vantaScript.src = 'https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.trunk.min.js';
+          document.head.appendChild(vantaScript);
+
+          await new Promise((resolve) => {
+            vantaScript.onload = resolve;
+          });
+        }
+
+        // Initialize Vanta effect
+        if (window.VANTA && window.VANTA.TRUNK && vantaRef.current) {
+          vantaEffect = window.VANTA.TRUNK({
+            el: vantaRef.current,
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: 200.00,
+            minWidth: 200.00,
+            scale: 1.00,
+            scaleMobile: 1.00,
+            color: 0x1352c5,
+            backgroundColor: 0xffffff,
+            spacing: 10.00,
+            chaos: 3.00
+          });
+        }
+      }
+    };
+
+    loadVanta();
+
+    return () => {
+      if (vantaEffect) vantaEffect.destroy();
+    };
+  }, []);
+
   // Get current front card for indicators
   const currentIndex = orderRef.current[0] || 0;
 
   return (
     <div
+      ref={vantaRef}
       id="story"
-      className="min-h-dvh w-full bg-white text-black overflow-hidden"
+      className="relative min-h-dvh w-full bg-white text-black overflow-hidden"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      <div className="flex size-full flex-col items-center py-10 pb-24">
+      <div className="relative z-10 flex size-full flex-col items-center py-10 pb-24">
         <div className="flex flex-col items-center justify-center text-center">
           <motion.p
             initial={{ opacity: 0, transform: "rotateX(-30deg) scale(0.9)" }}
@@ -399,8 +486,7 @@ const FloatingImage = () => {
             {/* Navigation Arrows - Desktop only */}
             <button
               onClick={prevSlide}
-              disabled={isAnimating}
-              className="absolute left-4 md:left-8 lg:left-16 top-1/2 -translate-y-1/2 z-40 w-14 h-14 rounded-full bg-black/80 backdrop-blur-md hidden md:flex items-center justify-center text-white border border-black hover:bg-black hover:scale-110 transition-all duration-300 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
+              className="absolute left-4 md:left-8 lg:left-16 top-1/2 -translate-y-1/2 z-40 w-14 h-14 rounded-full bg-black/80 backdrop-blur-md hidden md:flex items-center justify-center text-white border border-black hover:bg-black hover:scale-110 transition-all duration-300 cursor-pointer"
               aria-label="Previous slide"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -410,8 +496,7 @@ const FloatingImage = () => {
 
             <button
               onClick={nextSlide}
-              disabled={isAnimating}
-              className="absolute right-4 md:right-8 lg:right-16 top-1/2 -translate-y-1/2 z-40 w-14 h-14 rounded-full bg-black/80 backdrop-blur-md hidden md:flex items-center justify-center text-white border border-black hover:bg-black hover:scale-110 transition-all duration-300 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
+              className="absolute right-4 md:right-8 lg:right-16 top-1/2 -translate-y-1/2 z-40 w-14 h-14 rounded-full bg-black/80 backdrop-blur-md hidden md:flex items-center justify-center text-white border border-black hover:bg-black hover:scale-110 transition-all duration-300 cursor-pointer"
               aria-label="Next slide"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -424,8 +509,7 @@ const FloatingImage = () => {
           <div className="flex md:hidden justify-center items-center gap-6 mt-6">
             <button
               onClick={prevSlide}
-              disabled={isAnimating}
-              className="w-12 h-12 rounded-full bg-black/80 backdrop-blur-md flex items-center justify-center text-white border border-white/20 active:scale-95 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="w-12 h-12 rounded-full bg-black/80 backdrop-blur-md flex items-center justify-center text-white border border-white/20 active:scale-95 transition-all duration-200"
               aria-label="Previous slide"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -438,7 +522,6 @@ const FloatingImage = () => {
               {events.map((_, index) => (
                 <button
                   key={index}
-                  disabled={isAnimating}
                   className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${index === currentIndex ? 'bg-black w-8' : 'bg-black/30 w-2 hover:bg-black/50'}`}
                   aria-label={`Slide ${index + 1}`}
                 />
@@ -447,8 +530,7 @@ const FloatingImage = () => {
 
             <button
               onClick={nextSlide}
-              disabled={isAnimating}
-              className="w-12 h-12 rounded-full bg-black/80 backdrop-blur-md flex items-center justify-center text-white border border-white/20 active:scale-95 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="w-12 h-12 rounded-full bg-black/80 backdrop-blur-md flex items-center justify-center text-white border border-white/20 active:scale-95 transition-all duration-200"
               aria-label="Next slide"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

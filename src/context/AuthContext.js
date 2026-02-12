@@ -1,16 +1,23 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { authService } from '@/services/authService';
-import { clearAuthToken } from '@/services/api';
 
 const AuthContext = createContext(undefined);
 
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const hasCheckedAuth = useRef(false);
+    const isLoggedInThisSession = useRef(false);
 
     const checkAuth = useCallback(async () => {
+        // Skip if user was just logged in this session
+        if (isLoggedInThisSession.current) {
+            setLoading(false);
+            return;
+        }
+
         try {
             const response = await authService.getProfile();
             setUser(response.user);
@@ -18,22 +25,29 @@ export function AuthProvider({ children }) {
             setUser(null);
         } finally {
             setLoading(false);
+            hasCheckedAuth.current = true;
         }
     }, []);
 
     useEffect(() => {
-        checkAuth();
+        if (!hasCheckedAuth.current && !isLoggedInThisSession.current) {
+            checkAuth();
+        }
     }, [checkAuth]);
 
     const login = async (credentials) => {
         const response = await authService.login(credentials);
+        isLoggedInThisSession.current = true;
         setUser(response.user);
+        setLoading(false);
         return response;
     };
 
     const googleLogin = async (data) => {
         const response = await authService.loginGoogle(data);
+        isLoggedInThisSession.current = true;
         setUser(response.user);
+        setLoading(false);
         return response;
     };
 
@@ -43,8 +57,9 @@ export function AuthProvider({ children }) {
         } catch (error) {
             console.error('Logout error:', error);
         } finally {
-            clearAuthToken();
             setUser(null);
+            isLoggedInThisSession.current = false;
+            hasCheckedAuth.current = false;
         }
     };
 
@@ -55,7 +70,7 @@ export function AuthProvider({ children }) {
     const value = {
         user,
         loading,
-        isAuthenticated: !!user,
+        isAuthenticated: user,
         login,
         googleLogin,
         logout,

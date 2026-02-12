@@ -1,10 +1,11 @@
 "use client"
 import clsx from "clsx";
 
-const Button = ({ id, title, rightIcon, leftIcon, containerClass, titleClass }) => {
+const Button = ({ id, title, rightIcon, leftIcon, containerClass, titleClass, onClick }) => {
   return (
     <button
       id={id}
+      onClick={onClick}
       className={clsx(
         "group relative z-10 w-fit cursor-pointer overflow-hidden rounded-full bg-blue-75 px-7 py-3 text-black flex items-center justify-center gap-2",
         containerClass

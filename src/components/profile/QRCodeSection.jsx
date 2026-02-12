@@ -1,10 +1,17 @@
 "use client";
 import React, { useState } from "react";
+import { QRCodeSVG } from "qrcode.react";
 import { BentoTilt } from "../Features";
 import { TiTimes } from "react-icons/ti";
 
 const QRCodeSection = ({ ticketId }) => {
     const [isExpanded, setIsExpanded] = useState(false);
+
+    // QR Code data format for scanning
+    const qrData = JSON.stringify({
+        type: "PARTICIPANT",
+        uniqueId: ticketId || "KRIYA-26-0000"
+    });
 
     return (
         <>
@@ -17,9 +24,16 @@ const QRCodeSection = ({ ticketId }) => {
 
                 <div className="relative z-10 flex flex-col items-center justify-center h-full p-5 text-center">
                     <div className="relative bg-white/90 backdrop-blur-lg p-2 rounded-lg mb-4 shadow-lg">
-                        <div className="w-28 h-28 md:w-32 md:h-32 bg-black relative overflow-hidden flex items-center justify-center">
-                            <p className="text-white text-[10px] font-mono">QR CODE</p>
-                            <div className="absolute top-0 left-0 w-full h-full bg-linear-to-b from-transparent via-blue-500/50 to-transparent -translate-y-full animate-scan"></div>
+                        <div className="w-28 h-28 md:w-32 md:h-32 relative overflow-hidden flex items-center justify-center">
+                            <QRCodeSVG
+                                value={qrData}
+                                size={112}
+                                level="M"
+                                includeMargin={false}
+                                bgColor="transparent"
+                                fgColor="#000000"
+                            />
+                            <div className="absolute top-0 left-0 w-full h-full bg-linear-to-b from-transparent via-blue-500/50 to-transparent -translate-y-full animate-scan pointer-events-none"></div>
                         </div>
                     </div>
 
@@ -59,9 +73,16 @@ const QRCodeSection = ({ ticketId }) => {
 
                         <div className="flex flex-col items-center text-center">
                             <div className="relative bg-white p-4 rounded-lg mb-6">
-                                <div className="w-48 h-48 bg-black relative overflow-hidden flex items-center justify-center">
-                                    <p className="text-white text-xs font-mono">QR CODE</p>
-                                    <div className="absolute top-0 left-0 w-full h-full bg-linear-to-b from-transparent via-blue-500/50 to-transparent -translate-y-full animate-scan-modal"></div>
+                                <div className="w-48 h-48 relative overflow-hidden flex items-center justify-center">
+                                    <QRCodeSVG
+                                        value={qrData}
+                                        size={176}
+                                        level="M"
+                                        includeMargin={false}
+                                        bgColor="transparent"
+                                        fgColor="#000000"
+                                    />
+                                    <div className="absolute top-0 left-0 w-full h-full bg-linear-to-b from-transparent via-blue-500/50 to-transparent -translate-y-full animate-scan-modal pointer-events-none"></div>
                                 </div>
                             </div>
 
@@ -101,5 +122,3 @@ const QRCodeSection = ({ ticketId }) => {
 };
 
 export default QRCodeSection;
-
-

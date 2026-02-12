@@ -19,13 +19,6 @@ const EventTicket = ({ event }) => {
                             {event.category || "Technical"}
                         </span>
                     </div>
-
-                    {/* Admit Badge */}
-                    <div className="hidden md:block">
-                        <span className="font-general text-[8px] font-bold uppercase tracking-widest text-blue-75 border border-white/20 px-2 py-1 rounded-sm">
-                            ADMIT ONE
-                        </span>
-                    </div>
                 </div>
 
                 {/* Details - Always Visible */}
@@ -35,13 +28,6 @@ const EventTicket = ({ event }) => {
                             <TiCalendar /> <span className="uppercase font-general tracking-wide">Date</span>
                         </div>
                         <p className="text-white font-circular-web text-xs">{event.date}</p>
-                    </div>
-
-                    <div className="flex flex-col">
-                        <div className="flex items-center gap-1 text-gray-500 text-[10px] mb-0.5">
-                            <TiTime /> <span className="uppercase font-general tracking-wide">Time</span>
-                        </div>
-                        <p className="text-white font-circular-web text-xs">{event.time}</p>
                     </div>
 
                     <div className="flex flex-col">

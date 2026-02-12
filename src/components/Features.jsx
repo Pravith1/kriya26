@@ -2,6 +2,7 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { TiLocationArrow } from "react-icons/ti";
+import LazyVideo from "./ui/LazyVideo";
 
 export const BentoTilt = ({ children, className = "", onClick }) => {
   const [transformStyle, setTransformStyle] = useState("");
@@ -61,11 +62,8 @@ export const BentoCard = ({ src, title, description, isComingSoon, onClick }) =>
 
   return (
     <div className="relative size-full">
-      <video
+      <LazyVideo
         src={src}
-        loop
-        muted
-        autoPlay
         className="absolute left-0 top-0 size-full object-cover object-center"
       />
       <div className="relative z-10 flex size-full flex-col justify-between p-5 text-blue-75">
@@ -110,7 +108,7 @@ const Features = () => {
   };
 
   return (
-    <section className="bg-black py-20 pt-30">
+    <section id="features-section" className="bg-black py-20 pt-30">
       <div className="container mx-auto px-3 md:px-10">
 
         <BentoTilt
@@ -118,7 +116,7 @@ const Features = () => {
           onClick={() => handleCategoryClick('science')}
         >
           <BentoCard
-            src="videos/feature-1.mp4"
+            src="https://res.cloudinary.com/dkashskr5/video/upload/v1770518235/feature-1_lbavjc.mp4"
             title={
               <>
 
@@ -138,7 +136,7 @@ const Features = () => {
             onClick={() => handleCategoryClick('coding')}
           >
             <BentoCard
-              src="videos/feature-3.mp4"
+              src="https://res.cloudinary.com/dkashskr5/video/upload/v1770518243/feature-3_etye1i.mp4"
               title={
                 <>
                   <b>C</b>oding
@@ -155,7 +153,7 @@ const Features = () => {
             onClick={() => handleCategoryClick('quiz')}
           >
             <BentoCard
-              src="videos/feature-6.mp4"
+              src="https://res.cloudinary.com/dkashskr5/video/upload/v1770518246/feature-6_fea1gk.mp4"
               title={
                 <>
                   <b>Q</b>uiz
@@ -174,7 +172,7 @@ const Features = () => {
             onClick={() => handleCategoryClick('fashion')}
           >
             <BentoCard
-              src="videos/feature-2.mp4"
+              src="https://res.cloudinary.com/dkashskr5/video/upload/f_auto,q_auto/v1770518296/feature-2_vjtpsw.mp4"
               title={
                 <>
                   <b>F</b>ashion <b>T</b>echnology
@@ -192,7 +190,7 @@ const Features = () => {
           onClick={() => handleCategoryClick('core')}
         >
           <BentoCard
-            src="videos/feature-5.mp4"
+            src="https://res.cloudinary.com/dkashskr5/video/upload/v1770518276/feature-5_zrlqby.mp4"
             title={
               <>
 

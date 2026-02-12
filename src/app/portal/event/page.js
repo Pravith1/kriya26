@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { FaSoundcloud } from "react-icons/fa";
 import { useRouter, useSearchParams } from "next/navigation";
+import { IoMdArrowBack } from "react-icons/io";
 import { eventService } from "../../../services/eventservice";
 import "../../../styles/gradientAnimation.css";
 import PixelSnow from "../../../components/PixelSnow/PixelSnow";
@@ -41,12 +42,22 @@ const EventList = () => {
         }
 
         // Map to the format needed for the UI
+        const normalizeMongoDate = (d) => {
+          if (!d) return null;
+          if (typeof d === "string") return d;
+          // Handle Mongo-style date wrapper: { $date: "..." }
+          if (typeof d === "object" && d.$date) return d.$date;
+          return null;
+        };
+
         const mappedEvents = eventsData.map((event) => ({
           name: event.eventName || event.name,
           id: event.eventId || event.id,
-          date: event.date ? new Date(event.date).toLocaleDateString() : "TBA",
+          // Keep ISO-like date string for consistent formatting in UI
+          date: normalizeMongoDate(event.date) || "TBA",
           category: event.category,
-          time: event.timing || event.time || "TBA",
+          // Prefer structured startTime if present; otherwise fall back to timing string
+          time: event.startTime || event.timing || event.time || "TBA",
         })).sort((a, b) => a.name.localeCompare(b.name));
 
         setEvents(mappedEvents);
@@ -62,9 +73,9 @@ const EventList = () => {
               return {
                 name: event.eventName || event.name,
                 id: event.eventId || event.id,
-                date: event.date ? new Date(event.date).toLocaleDateString() : "TBA",
+                date: normalizeMongoDate(event.date) || "TBA",
                 category: event.category,
-                time: event.timing || event.time || "TBA",
+                time: event.startTime || event.timing || event.time || "TBA",
               };
             });
             setFeaturedGoldEvents(goldEvents);
@@ -77,9 +88,9 @@ const EventList = () => {
               return {
                 name: event.eventName || event.name,
                 id: event.eventId || event.id,
-                date: event.date ? new Date(event.date).toLocaleDateString() : "TBA",
+                date: normalizeMongoDate(event.date) || "TBA",
                 category: event.category,
-                time: event.timing || event.time || "TBA",
+                time: event.startTime || event.timing || event.time || "TBA",
               };
             });
             setFeaturedPlatinumEvents(platinumEvents);
@@ -183,7 +194,8 @@ const EventList = () => {
         </div>
       ) : (
         <div>
-          <div className="flex justify-center mb-8 px-4 relative z-30">
+          <div className="flex justify-center items-center gap-6 mb-8 px-4 relative z-30">
+
             <input
               type="text"
               placeholder="Search events by name, category, date, or time..."
