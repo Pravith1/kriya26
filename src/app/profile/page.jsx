@@ -39,7 +39,7 @@ const transformEvent = (item, itemType) => ({
 
 export default function ProfilePage() {
     const router = useRouter();
-    const { user, loading: authLoading, isAuthenticated, logout } = useAuth();
+    const { user, loading: authLoading, isAuthenticated, logout, refreshUser } = useAuth();
     const [activeTab, setActiveTab] = useState("profile");
     const [events, setEvents] = useState([]);
     const [workshops, setWorkshops] = useState([]);
@@ -48,6 +48,13 @@ export default function ProfilePage() {
     const [error, setError] = useState(null);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const vantaRef = useRef(null);
+
+    // Handler to refresh user data after profile update
+    const handleProfileUpdate = async () => {
+        if (refreshUser) {
+            await refreshUser();
+        }
+    };
 
     // Redirect to auth if not authenticated
     // Use a small delay to allow auth state to stabilize after navigation
@@ -245,7 +252,12 @@ export default function ProfilePage() {
                         <>
                             {/* Row 1: Profile Header (Full Width) */}
                             <section>
-                                <ProfileHeader user={userData} onLogout={handleLogout} isLoggingOut={isLoggingOut} />
+                                <ProfileHeader 
+                                    user={userData} 
+                                    onLogout={handleLogout} 
+                                    isLoggingOut={isLoggingOut} 
+                                    onProfileUpdate={handleProfileUpdate}
+                                />
                             </section>
 
                             {/* Row 2: Stats Row (Horizontal) */}
