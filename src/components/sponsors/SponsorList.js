@@ -20,13 +20,13 @@ const SponsorList = () => {
       <div className="flex flex-col lg:flex-row items-center justify-evenly w-full max-w-5xl gap-12">
         
         {/* Kriya Logo (Left Side) */}
-        <div className="flex justify-center">
+        {/* <div className="flex justify-center">
           <img
             src="/assets/Logo/Kriya25whitelogo.png"
             alt="Kriya Logo"
             className="w-48 md:w-80 transition-all duration-300"
           />
-        </div>
+        </div> */}
 
         {/* Title Sponsor (Right Side) */}
         <div className="flex flex-col items-center">

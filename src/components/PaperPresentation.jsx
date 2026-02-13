@@ -134,7 +134,7 @@ const PaperPresentation = () => {
             </div>
 
             {/* Mobile Layout */}
-            <div className="relative z-10 w-full mx-auto flex lg:hidden flex-col h-[100vh]">
+            <div className="relative z-10 w-full mx-auto flex lg:hidden flex-col h-screen">
                 {/* Header Section */}
                 <div className="w-full text-center pt-8 pb-6 px-4 shrink-0">
                     <AnimatedTitle

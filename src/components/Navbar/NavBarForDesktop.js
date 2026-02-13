@@ -162,13 +162,13 @@ const NavBarForDesktop = () => {
             <HiOutlinePresentationChartBar className="text-lg" />
             <p className="">Paper Presentations</p>
           </Link>
-          <Link
+          {/* <Link
             href="/portal/accommodation"
             className="flex items-center w-full py-2 space-x-4 text-left text-white  hover:text-gray-300 "
           >
             <BiBuildingHouse className="text-lg" />
             <p className="">Accommodations</p>
-          </Link>
+          </Link> */}
         </div>
         <div className="py-4">
           <div className="flex justify-between items-center space-x-4">

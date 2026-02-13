@@ -216,13 +216,13 @@ const NavBarForMobile = () => {
           >
             Paper Presentations
           </Link>
-          <Link
+          {/* <Link
             href="/portal/accommodation"
             id="navElements"
             className="w-full py-2 text-left text-white text-gray-600 hover:text-gray-300"
           >
             Accommodations
-          </Link>
+          </Link> */}
         </div>
         <div className="px-6 py-8 pb-16" id="navOpen">
           <div className="flex items-center space-x-4">
