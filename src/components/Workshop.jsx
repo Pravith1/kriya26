@@ -2,6 +2,7 @@
 
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import axios from "axios";
 import { TiLocationArrow, TiCalendar } from "react-icons/ti";
@@ -152,6 +153,7 @@ const cardStaggerVariants = {
 };
 
 const WorkshopCard = ({ item, isHovered, isSiblingHovered, onHover, onLeave, index, isMobile }) => {
+  const router = useRouter();
   const formatDate = (dateString) => {
     if (!dateString) return "";
     const date = new Date(dateString);
@@ -220,6 +222,10 @@ const WorkshopCard = ({ item, isHovered, isSiblingHovered, onHover, onLeave, ind
 
             {/* ACTION BUTTON - Premium "Learn More" */}
             <button
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/portal/workshop/${item.id}`);
+              }}
               className="group/btn relative flex items-center justify-center gap-2 px-6 py-3 bg-white text-black font-bold text-sm uppercase tracking-wider rounded-lg overflow-hidden transition-all duration-200 hover:bg-blue-500 hover:text-white shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_20px_rgba(59,130,246,0.5)]"
             >
               <span className="relative z-10">Learn More</span>
@@ -270,7 +276,7 @@ const WorkshopCard = ({ item, isHovered, isSiblingHovered, onHover, onLeave, ind
                 >
                   <span className="text-blue-400 text-[10px] uppercase font-bold tracking-widest mb-1">Time</span>
                   <span className="text-white text-sm font-circular-web flex items-center gap-2 text-shadow-sm">
-                    <TiLocationArrow className="rotate-45 text-blue-400" /> {item.time}
+                    <TiLocationArrow className="rotate-45 text-blue-400" /> {item.startTime && item.endTime ? `${item.startTime} - ${item.endTime}` : item.time}
                   </span>
                 </motion.div>
 
@@ -401,6 +407,8 @@ const Workshop = () => {
             hall: ws.hall,
             date: ws.date,
             time: ws.time,
+            startTime: ws.startTime,
+            endTime: ws.endTime,
             img: STATIC_IMAGES[index % STATIC_IMAGES.length], // Cycle through static images
           }));
           setWorkshops(mappedWorkshops);

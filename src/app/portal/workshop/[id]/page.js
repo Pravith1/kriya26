@@ -1,17 +1,21 @@
 "use client";
-import { IoMdCall, IoLogoWhatsapp } from "react-icons/io";
+import { IoMdCall, IoLogoWhatsapp, IoMdArrowBack } from "react-icons/io";
 import { useRouter, useParams } from "next/navigation";
-import { useState, useEffect } from "react";
-import { MdAccessTime, MdOutlineLocationOn } from "react-icons/md";
+import { useState, useRef, useEffect } from "react";
 import { eventService } from "../../../../services/eventservice";
 import ConfirmationModal from "@/components/ConfirmationModal";
 import Image from "next/image";
+import EventDetailsModal from "@/components/EventDetailsModal";
 import { useAuth } from "@/context/AuthContext";
 import { getWhatsAppLink } from "@/data/whatsappLinks";
 
+// Default accent for workshops - Blue to match landing page
+const WORKSHOP_ACCENT = { primary: "#60A5FA", secondary: "#3B82F6", bg: "rgba(96, 165, 250, 0.10)" };
+
 const toTitleCase = (phrase) => {
+  if (!phrase) return "";
   const wordsToIgnore = ["of", "in", "for", "and", "an", "or"];
-  const wordsToCapitalize = ["it", "cad"];
+  const wordsToCapitalize = ["it", "cad", "psg"];
 
   return phrase
     .toLowerCase()
@@ -30,26 +34,28 @@ const toTitleCase = (phrase) => {
 
 export default function WorkshopPage({ params }) {
   const { id } = useParams(params);
-  const { user, isAuthenticated, loading: authLoading } = useAuth();
-
+  const { user, isAuthenticated } = useAuth();
   const router = useRouter();
+
   const [generalPayment, setGeneralPayment] = useState(false);
   const [userWorkshopDetails, setUserWorkshopDetails] = useState(null);
-  const [registrationLoading, setRegistrationLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [workshopDetail, setWorkshopDetail] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLearnMoreOpen, setIsLearnMoreOpen] = useState(false);
 
-  // Set general payment status from auth context
+  // Use purple accent for all workshops for now
+  const accent = WORKSHOP_ACCENT;
+
   useEffect(() => {
     if (user) {
       setGeneralPayment(user.generalFeePaid || user.isPaid || false);
     }
   }, [user]);
 
-  // Fetch user's registered workshops
   useEffect(() => {
     if (isAuthenticated) {
-      setRegistrationLoading(true);
+      setLoading(true);
       eventService.getUserWorkshops().then((res) => {
         let workshopData = [];
         if (Array.isArray(res)) {
@@ -59,12 +65,11 @@ export default function WorkshopPage({ params }) {
         } else if (res?.data && Array.isArray(res.data)) {
           workshopData = res.data;
         }
-        console.log('User workshops loaded:', workshopData.map(w => w.workshopId || w._id));
         setUserWorkshopDetails(workshopData);
       }).catch(err => console.error("Error fetching user workshops:", err))
-        .finally(() => setRegistrationLoading(false));
+        .finally(() => setLoading(false));
     } else {
-      setRegistrationLoading(false);
+      setLoading(false);
     }
   }, [isAuthenticated]);
 
@@ -73,24 +78,19 @@ export default function WorkshopPage({ params }) {
       try {
         const res1 = await eventService.getWorkshopById(id);
         const workshopData = res1?.workshop || res1;
-        console.log(workshopData);
         setWorkshopDetail(workshopData);
       } catch (error) {
         console.error("Error fetching workshop details:", error);
       }
     };
-
     fetchData();
   }, [id]);
 
-  // Helper to check if user is registered for current workshop
   const isRegisteredForWorkshop = () => {
     if (!userWorkshopDetails || !Array.isArray(userWorkshopDetails)) return false;
-    const registered = userWorkshopDetails.some((w) =>
+    return userWorkshopDetails.some((w) =>
       w.workshopId === id || w.workshop_id === id || w._id === id
     );
-    console.log('Checking registration for workshop:', id, 'User workshops:', userWorkshopDetails.map(w => w.workshopId || w._id), 'Registered:', registered);
-    return registered;
   };
 
   const handleRegister = async () => {
@@ -110,229 +110,312 @@ export default function WorkshopPage({ params }) {
     }
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return "";
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString("en-US", { 
-        month: "long", 
-        day: "numeric",
-        year: "numeric"
-      });
-    } catch {
-      return dateString;
-    }
+  const getMappedEventDetail = () => {
+    if (!workshopDetail) return null;
+    return {
+      eventName: workshopDetail.workshopName,
+      category: workshopDetail.clubName || "Workshop",
+      custom_category: "Workshop",
+      closed: workshopDetail.closed,
+      timing: workshopDetail.startTime && workshopDetail.endTime ? `${workshopDetail.startTime} - ${workshopDetail.endTime}` : workshopDetail.time,
+      hall: workshopDetail.hall,
+      teamSize: "Individual", // Default for workshops
+      description: workshopDetail.description,
+      contacts: workshopDetail.contacts || [],
+      // Map other fields if needed for the modal
+    };
   };
 
   return !workshopDetail ? (
-    <div className="flex items-center justify-center h-full">
-      <p className="text-lg font-semibold text-gray-600 animate-pulse">
+    <div className="flex items-center justify-center h-full bg-[#0a0a0a]">
+      <p className="text-lg font-semibold text-white/60 animate-pulse">
         Loading workshop...
       </p>
     </div>
   ) : (
-    <div
-      className="w-full min-h-screen mt-10 flex flex-col overflow-y-auto bg-gray-200 z-20 relative lg:mt-0"
-    >
-      <div
-        className="sticky top-0 z-20 w-full p-4 mt-2 md:px-6 lg:px-8 lg:mt-0 backdrop-blur-2xl flex items-center justify-between"
-      >
-        <h1 className="special-font text-2xl md:text-5xl font-bold text-black font-poppins truncate max-w-[50%]">
-          <b>{workshopDetail.workshopName}</b>
-        </h1>
+    <div className="w-full min-h-screen flex flex-col overflow-y-auto bg-[#0a0a0a] z-20 relative lg:mt-0">
 
-        <div className="flex items-center gap-4">
+      {/* ===== Background Effects ===== */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div
+          className="event-bg-orb event-bg-orb-1"
+          style={{ background: accent.primary }}
+        />
+        <div
+          className="event-bg-orb event-bg-orb-2"
+          style={{ background: accent.secondary }}
+        />
+        <div
+          className="event-bg-orb event-bg-orb-3"
+          style={{ background: accent.primary, opacity: 0.15 }}
+        />
+        <div className="dot-grid-overlay" />
+        <div className="noise-overlay" />
+      </div>
+
+      {/* ===== Top Gradient Accent Line ===== */}
+      <div
+        className="w-full h-[2px] relative z-10"
+        style={{ background: `linear-gradient(90deg, transparent, ${accent.primary}, transparent)` }}
+      />
+
+      {/* ===== Header ===== */}
+      <div className="relative md:sticky md:top-0 mt-10 md:mt-0 z-40 w-full p-3 md:p-4 md:px-6 lg:px-8 backdrop-blur-xl bg-black/40 border-b border-white/5 flex flex-col md:flex-row items-center justify-between gap-3 md:gap-0">
+        <div className="flex items-center gap-4 w-full md:max-w-[50%]">
           <button
-            className="px-7 py-3 bg-black text-white font-bold uppercase tracking-wider text-xs md:text-base hover:bg-white hover:text-black border-2 border-black transition-all duration-300 w-fit shadow-lgr"
+            onClick={() => router.back()}
+            className="p-2 rounded-full hover:bg-white/10 transition-colors text-white"
+            aria-label="Go back"
+          >
+            <IoMdArrowBack className="text-xl md:text-2xl" />
+          </button>
+        </div>
+
+        <div className="flex items-center gap-3 w-full md:w-auto justify-center md:justify-end">
+          <button
+            className="flex-1 md:flex-none px-3 py-2 md:px-7 md:py-3 font-bold uppercase tracking-wider text-[10px] md:text-sm transition-all duration-300 border"
             disabled={isRegisteredForWorkshop() || workshopDetail.closed}
-            onClick={() => {
-              setIsModalOpen(true);
+            onClick={() => setIsModalOpen(true)}
+            style={{
+              background: isRegisteredForWorkshop() ? accent.primary : 'transparent',
+              color: isRegisteredForWorkshop() ? '#0a0a0a' : 'white',
+              borderColor: accent.primary,
             }}
           >
             {userWorkshopDetails && (
               <>
-                {isRegisteredForWorkshop() ? (
-                  "Registered"
-                ) : workshopDetail.closed ? (
-                  "Registrations Closed"
-                ) : (
-                  "Register"
-                )}
+                {isRegisteredForWorkshop() ? "Registered" : workshopDetail.closed ? "Closed" : "Register"}
               </>
             )}
+            {!userWorkshopDetails && <>{workshopDetail.closed ? "Closed" : "Register"}</>}
+          </button>
 
-            {!userWorkshopDetails && <>{workshopDetail.closed ? (
-              "Registrations Closed"
-            ) : (
-              "Register"
-            )}</>}
+          <button
+            className="flex-1 md:flex-none px-3 py-2 md:px-7 md:py-3 text-white font-bold uppercase tracking-wider text-[10px] md:text-sm border border-white/20 hover:bg-white/10 transition-all duration-300"
+            onClick={() => setIsLearnMoreOpen(true)}
+          >
+            Learn More
           </button>
         </div>
       </div>
 
-      <div className="flex flex-col flex-1 w-full px-4 md:px-8 py-6 gap-8">
-        {/* Top Section: Workshop Name, Club, Description */}
+      {/* ===== Main Content ===== */}
+      <div className="flex flex-col flex-1 w-full px-4 md:px-8 py-8 gap-6 relative z-10">
+
+        {/* Hero Section: Name + Description */}
         <div className="flex flex-col lg:flex-row w-full gap-8">
           {/* Left: Workshop Info */}
           <div className="w-full lg:w-1/2 flex flex-col gap-6">
+            {/* Category Badge */}
+            <div
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full w-fit text-xs font-bold uppercase tracking-widest"
+              style={{ background: accent.bg, color: accent.primary, border: `1px solid ${accent.primary}30` }}
+            >
+              <span
+                className="w-2 h-2 rounded-full animate-pulse"
+                style={{ background: accent.primary }}
+              />
+              {workshopDetail.clubName || "Workshop"}
+            </div>
+
             {/* Workshop Name */}
-            <div className="flex flex-col gap-2">
-              <h1 className="special-font text-4xl md:text-6xl lg:text-7xl font-black font-poppins text-black leading-none uppercase tracking-wider">
-                <b>{workshopDetail.workshopName}</b>
-              </h1>
-              {workshopDetail.clubName && (
-                <p className="special-font text-xl md:text-3xl font-bold text-blue-600 uppercase tracking-widest">
-                  <b>{workshopDetail.clubName}</b>
-                </p>
-              )}
+            <h1 className="special-font text-3xl md:text-5xl lg:text-6xl font-black font-poppins text-white leading-none uppercase tracking-wider">
+              <b>{workshopDetail.workshopName}</b>
+            </h1>
+
+            {/* Description */}
+            <div className="text-base md:text-lg text-white/70 leading-relaxed mt-2 whitespace-pre-wrap">
+              {workshopDetail.description}
             </div>
 
-            {/* Workshop Description */}
-            <div className="mt-4">
-              <div className="text-base md:text-lg text-gray-800 leading-relaxed">
-                {workshopDetail.description}
-              </div>
-            </div>
-
-            {/* WhatsApp Button - Only show if user is registered */}
-            {isRegisteredForWorkshop() && (
-              <div className="mt-4">
+            {/* Action Buttons */}
+            <div className="flex flex-wrap gap-4 mt-4">
+              {/* WhatsApp Button - Only show if user is registered */}
+              {isRegisteredForWorkshop() && (
                 <a
                   href={getWhatsAppLink(id)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-6 py-2 md:px-10 md:py-3 bg-[#25D366] text-white font-bold uppercase tracking-wider text-xs md:text-base hover:bg-[#20BA5A] border-2 border-[#25D366] transition-all duration-300 w-fit shadow-lg"
+                  className="px-6 py-2.5 md:px-8 md:py-3 bg-[#25D366] text-white font-bold uppercase tracking-wider text-xs md:text-sm hover:bg-[#20BA5A] transition-all duration-300 w-fit flex items-center gap-2 rounded-sm"
                 >
-                  <IoLogoWhatsapp className="text-lg md:text-xl" />
+                  <IoLogoWhatsapp className="text-lg" />
                   WhatsApp Group
                 </a>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           {/* Right: Workshop Image */}
-          <div className="w-full lg:w-1/2 h-[400px] lg:h-[500px] bg-gray-100 rounded-xl overflow-hidden relative shadow-lg flex items-center justify-center">
-            <div className="w-full h-full relative">
-              <Image
-                src={`/img/workshops/${workshopDetail.workshopId?.toLowerCase() || 'ws1'}.png`}
-                fill
-                sizes="(max-width: 768px) 100vw, 50vw"
-                alt={workshopDetail.workshopName}
-                className="object-cover opacity-90 hover:scale-105 transition-transform duration-700"
-                onError={(e) => {
-                  e.target.src = '/img/workshops/ws1.png';
-                }}
+          <div className="w-full lg:w-1/2 h-[350px] md:h-[400px] lg:h-[480px] rounded-2xl overflow-hidden relative shadow-2xl flex items-center justify-center border border-white/10 bg-[#111]">
+            <Image
+              src={`/img/workshops/ws${parseInt(workshopDetail.workshopId?.replace(/\D/g, '') || '1')}.png`}
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              alt={workshopDetail.workshopName}
+              className="object-cover opacity-80 hover:scale-105 transition-transform duration-700"
+              onError={(e) => {
+                e.target.src = '/img/workshops/ws1.png';
+              }}
+            />
+            {/* Corner accent */}
+            <div
+              className="absolute top-0 left-0 w-20 h-20 pointer-events-none"
+              style={{
+                background: `linear-gradient(135deg, ${accent.primary}20 0%, transparent 60%)`,
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Info Cards Row */}
+        <div className="flex flex-col lg:flex-row gap-6 w-full">
+          {/* Logistics Card */}
+          <div className="glass-card p-6 md:p-8 flex-1">
+            <div className="flex items-center gap-3 mb-6">
+              <div
+                className="w-3 h-3 rounded-full pulse-glow"
+                style={{ color: accent.primary, background: accent.primary }}
               />
-              <div className="absolute inset-0 bg-black/10"></div>
+              <span className="text-white font-bold uppercase tracking-widest text-sm">
+                {workshopDetail.closed ? "Registrations Closed" : "Live Now"}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div>
+                <p className="text-xs uppercase tracking-widest mb-1.5 font-bold" style={{ color: accent.primary }}>Timing</p>
+                <p className="text-white font-semibold text-lg">{workshopDetail.startTime && workshopDetail.endTime ? `${workshopDetail.startTime} - ${workshopDetail.endTime}` : (workshopDetail.time || "TBA")}</p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-widest mb-1.5 font-bold" style={{ color: accent.primary }}>Venue</p>
+                <p className="text-white font-semibold text-lg">{workshopDetail.hall || "TBA"}</p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-widest mb-1.5 font-bold" style={{ color: accent.primary }}>Date</p>
+                <p className="text-white font-semibold text-lg">
+                  {workshopDetail.date ? new Date(workshopDetail.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "TBA"}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-widest mb-1.5 font-bold" style={{ color: accent.primary }}>Fee</p>
+                <p className="text-white font-semibold text-lg">
+                  {workshopDetail.actualFee ? `₹${workshopDetail.actualFee}` : "Free"}
+                </p>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="w-full flex flex-col lg:flex-row gap-8 lg:gap-12 px-5">
-          <div className="w-full">
-            {/* Logistics - Mobile Only */}
-            <div className="w-full flex lg:hidden flex-col justify-center gap-6 p-2 mt-8">
-              <div className="flex special-font items-center gap-4 text-3xl md:text-6xl font-bold uppercase tracking-wider mb-2">
-                <h1><b>{workshopDetail.closed ? "Closed" : "Live"}</b></h1>
-                <span className="w-2 h-2 bg-black rounded-full mx-2 animate-pulse"></span>
-                {workshopDetail.amount && (
-                  <h1><b>₹{workshopDetail.amount}</b></h1>
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 gap-6 w-full">
-                <div>
-                  <p className="text-2xl md:text-2xl special-font text-blue-600 font-bold uppercase tracking-widest mb-1"><b>Date</b></p>
-                  <p className="text-xl md:text-xl font-bold text-black">{formatDate(workshopDetail.date)}</p>
-                </div>
-
-                <div>
-                  <p className="text-2xl md:text-2xl special-font text-blue-600 font-bold uppercase tracking-widest mb-1"><b>Time</b></p>
-                  <p className="text-xl md:text-xl font-bold text-black">{workshopDetail.time || "TBA"}</p>
-                </div>
-
-                <div>
-                  <p className="text-2xl md:text-2xl special-font text-blue-600 font-bold uppercase tracking-widest mb-1"><b>Venue</b></p>
-                  <p className="text-xl md:text-xl font-bold text-black">{workshopDetail.hall || "TBA"}</p>
-                </div>
-
-                {workshopDetail.amount && (
-                  <div>
-                    <p className="text-2xl md:text-2xl special-font text-blue-600 font-bold uppercase tracking-widest mb-1"><b>Fee</b></p>
-                    <p className="text-xl md:text-xl font-bold text-black">₹{workshopDetail.amount}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Convenors Section */}
+        {/* Bottom Section: Convenors */}
+        <div className="flex flex-col lg:flex-row gap-8 w-full">
+          {/* Left: Convenors */}
+          <div className="w-full lg:w-7/12 flex flex-col gap-8">
             {workshopDetail.contacts && workshopDetail.contacts.length > 0 && (
-              <div className="flex flex-col items-start mt-10 mb-8">
-                <h3 className="text-3xl md:text-3xl special-font font-bold uppercase tracking-widest border-b-2 border-black pb-1 mb-6"><b>Convenors</b></h3>
-                <div className="flex flex-col md:flex-row gap-8 md:gap-16 w-full">
-                  {workshopDetail.contacts.map((contact, index) => (
-                    contact && (
-                      <div key={index} className="flex items-center gap-4 group">
-                        <div className="w-10 h-10 shrink-0 bg-black text-white rounded-full flex items-center justify-center text-lg shadow-lg group-hover:scale-110 transition-transform">
-                          <IoMdCall />
+              <div className="glass-card p-6 md:p-8">
+                <h3 className="special-font text-2xl md:text-3xl font-bold uppercase tracking-widest text-white mb-6 flex items-center gap-3">
+                  <span className="w-1 h-8 rounded-full" style={{ background: accent.primary }} />
+                  <b>Convenors</b>
+                </h3>
+                <div className="flex flex-col md:flex-row gap-6 w-full">
+                  {workshopDetail.contacts.map(
+                    (contact, index) =>
+                      contact && (
+                        <div key={index} className="flex items-center gap-4 group glass-card-light px-4 py-3">
+                          <div
+                            className="w-10 h-10 shrink-0 rounded-full flex items-center justify-center text-lg shadow-lg group-hover:scale-110 transition-transform text-white"
+                            style={{ background: accent.primary }}
+                          >
+                            <IoMdCall />
+                          </div>
+                          <div>
+                            <p className="font-bold text-base uppercase leading-tight text-white">{toTitleCase(contact.name)}</p>
+                            <p className="text-white/40 font-mono text-sm tracking-wide">{contact.mobile}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-bold text-lg uppercase leading-tight">{toTitleCase(contact.name)}</p>
-                          <p className="text-gray-600 font-mono text-sm tracking-wide">{contact.mobile}</p>
-                        </div>
-                      </div>
-                    )
+                      )
+                  )}
+                </div>
+              </div>
+            )}
+
+
+            {/* Agenda Section */}
+            {workshopDetail.agenda && workshopDetail.agenda.length > 0 && (
+              <div className="glass-card p-6 md:p-8">
+                <h3 className="special-font text-2xl md:text-3xl font-bold uppercase tracking-widest text-white mb-6 flex items-center gap-3">
+                  <span className="w-1 h-8 rounded-full" style={{ background: accent.primary }} />
+                  <b>Agenda</b>
+                </h3>
+                <div className="space-y-8">
+                  {workshopDetail.agenda.map((item, index) => (
+                    <div key={index} className="relative pl-8 border-l border-white/10 last:border-0">
+                      <div className="absolute -left-[5px] top-0 w-2.5 h-2.5 rounded-full" style={{ background: accent.primary }} />
+                      <p className="text-sm font-bold uppercase tracking-widest mb-2" style={{ color: accent.primary }}>
+                        {item.time}
+                      </p>
+                      <p className="text-white/80 leading-relaxed text-sm md:text-base">
+                        {item.description}
+                      </p>
+                    </div>
                   ))}
                 </div>
               </div>
             )}
+
+            {/* Prerequisites Section */}
+            {workshopDetail.prerequisites && (
+              <div className="glass-card p-6 md:p-8">
+                <h3 className="special-font text-2xl md:text-3xl font-bold uppercase tracking-widest text-white mb-6 flex items-center gap-3">
+                  <span className="w-1 h-8 rounded-full" style={{ background: accent.primary }} />
+                  <b>Prerequisites</b>
+                </h3>
+                <div className="text-white/70 leading-relaxed whitespace-pre-wrap">
+                  {workshopDetail.prerequisites}
+                </div>
+              </div>
+            )}
+
           </div>
 
-          {/* Right: Logistics - Desktop Only */}
-          <div className="hidden lg:flex w-full lg:w-5/12 flex-col justify-center gap-6 p-2">
-            <div className="flex special-font items-center gap-4 text-3xl md:text-6xl font-bold uppercase tracking-wider mb-2">
-              <h1><b>{workshopDetail.closed ? "Closed" : "Live"}</b></h1>
-              <span className="w-2 h-2 bg-black rounded-full mx-2 animate-pulse"></span>
-              {workshopDetail.amount && (
-                <h1><b>₹{workshopDetail.amount}</b></h1>
-              )}
-            </div>
-
-            <div className="space-y-6">
-              <div className="flex items-center gap-5">
-                <div>
-                  <p className="text-2xl md:text-2xl special-font text-blue-600 font-bold uppercase tracking-widest mb-1"><b>Date</b></p>
-                  <p className="text-lg md:text-xl font-bold text-black">{formatDate(workshopDetail.date)}</p>
-                </div>
+          {/* Right: Sticky Image Card (Repeated for visual balance or different aspect) */}
+          <div className="w-full lg:w-5/12 flex flex-col gap-6">
+            <div className="glass-card overflow-hidden rounded-2xl h-[350px] lg:h-[420px] relative">
+              <Image
+                src={`/img/workshops/ws${parseInt(workshopDetail.workshopId?.replace(/\D/g, '') || '1')}.png`}
+                fill
+                sizes="(max-width: 768px) 100vw, 40vw"
+                alt={workshopDetail.workshopName}
+                className="object-cover opacity-80 hover:scale-105 transition-transform duration-700"
+                onError={(e) => {
+                  e.target.src = '/img/workshops/ws1.png';
+                }}
+              />
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: `linear-gradient(180deg, transparent 40%, ${accent.primary}15 70%, #0a0a0a 100%)`,
+                }}
+              />
+              <div className="absolute bottom-0 left-0 right-0 p-6">
+                <p className="text-white/40 text-xs uppercase tracking-widest font-bold mb-1">{workshopDetail.clubName}</p>
+                <h3 className="special-font text-2xl md:text-3xl font-bold text-white uppercase">
+                  <b>{workshopDetail.workshopName}</b>
+                </h3>
               </div>
-
-              <div className="flex items-center gap-5">
-                <div>
-                  <p className="text-2xl md:text-2xl special-font text-blue-600 font-bold uppercase tracking-widest mb-1"><b>Time</b></p>
-                  <p className="text-lg md:text-xl font-bold text-black">{workshopDetail.time || "TBA"}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-5">
-                <div>
-                  <p className="text-2xl md:text-2xl special-font text-blue-600 font-bold uppercase tracking-widest mb-1"><b>Venue</b></p>
-                  <p className="text-lg md:text-xl font-bold text-black">{workshopDetail.hall || "TBA"}</p>
-                </div>
-              </div>
-
-              {workshopDetail.amount && (
-                <div className="flex items-center gap-5">
-                  <div>
-                    <p className="text-2xl md:text-2xl special-font text-blue-600 font-bold uppercase tracking-widest mb-1"><b>Fee</b></p>
-                    <p className="text-lg md:text-xl font-bold text-black">₹{workshopDetail.amount}</p>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
       </div>
 
+      {/* ===== Learn More Modal ===== */}
+      {isLearnMoreOpen && (
+        <EventDetailsModal
+          eventDetail={getMappedEventDetail()}
+          onClose={() => setIsLearnMoreOpen(false)}
+        />
+      )}
+
+      {/* ===== Registration Modal ===== */}
       {isModalOpen && (
         <ConfirmationModal
           onConfirm={handleRegister}
