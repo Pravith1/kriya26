@@ -180,11 +180,11 @@ const Hero = ({ preloaderComplete = true }) => {
               <h2 className="special-font font-zentry font-thin uppercase text-white bg-clip-text text-transparent">
                 <span className="">Ma<b>r</b>c<b>h</b></span>
               </h2>
-              <span className="text-blue-400 ">14</span>
+              <span className="text-blue-400 ">13</span>
+              <span className="text-purple-400">,</span>
+              <span className="text-blue-400">14</span>
               <span className="text-purple-400">,</span>
               <span className="text-blue-400">15</span>
-              <span className="text-purple-400">,</span>
-              <span className="text-blue-400">16</span>
             </div>
           </div>
 
@@ -224,11 +224,11 @@ const Hero = ({ preloaderComplete = true }) => {
             <h2 className="special-font font-zentry font-thin uppercase text-white bg-clip-text text-transparent">
               <span className="p-2"><b>Ma<b><b>r</b></b>ch</b></span>
             </h2>
+            <span>13</span>
+            <span className="text-blue-400">,</span>
             <span>14</span>
             <span className="text-blue-400">,</span>
             <span>15</span>
-            <span className="text-blue-400">,</span>
-            <span>16</span>
           </div>
           <div className="flex justify-center gap-4 mt-6">
             <a
