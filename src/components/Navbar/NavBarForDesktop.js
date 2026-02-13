@@ -36,7 +36,9 @@ const NavBarForDesktop = () => {
 
         // Fetch events
         const eventsResponse = await eventService.getAllEvents();
-        const eventsData = Array.isArray(eventsResponse.events) ? eventsResponse.events : eventsResponse?.data || [];
+        const eventsData = Array.isArray(eventsResponse.events)
+          ? eventsResponse.events
+          : eventsResponse?.data || [];
         const sortedEvents = eventsData
           .map((event) => ({
             name: event.eventName || event.name,
@@ -48,9 +50,11 @@ const NavBarForDesktop = () => {
 
         // Fetch Gold and Platinum events by specific IDs
         try {
-          const goldPromises = GOLD_EVENT_IDS.map(id => eventService.getEventById(id));
+          const goldPromises = GOLD_EVENT_IDS.map((id) =>
+            eventService.getEventById(id),
+          );
           const goldResponses = await Promise.all(goldPromises);
-          const goldEvents = goldResponses.map(res => {
+          const goldEvents = goldResponses.map((res) => {
             const event = res?.event || res;
             return {
               name: event.eventName || event.name,
@@ -60,9 +64,11 @@ const NavBarForDesktop = () => {
           });
           setGoldEvents(goldEvents);
 
-          const platinumPromises = PLATINUM_EVENT_IDS.map(id => eventService.getEventById(id));
+          const platinumPromises = PLATINUM_EVENT_IDS.map((id) =>
+            eventService.getEventById(id),
+          );
           const platinumResponses = await Promise.all(platinumPromises);
-          const platinumEvents = platinumResponses.map(res => {
+          const platinumEvents = platinumResponses.map((res) => {
             const event = res?.event || res;
             return {
               name: event.eventName || event.name,
@@ -77,7 +83,9 @@ const NavBarForDesktop = () => {
 
         // Fetch workshops
         const workshopsResponse = await eventService.getAllWorkshops();
-        const workshopsData = Array.isArray(workshopsResponse.workshops) ? workshopsResponse.workshops : workshopsResponse?.data?.workshops || [];
+        const workshopsData = Array.isArray(workshopsResponse.workshops)
+          ? workshopsResponse.workshops
+          : workshopsResponse?.data?.workshops || [];
         const sortedWorkshops = workshopsData
           .map((workshop) => ({
             name: workshop.workshopName || workshop.name,
@@ -88,7 +96,9 @@ const NavBarForDesktop = () => {
 
         // Fetch papers
         const papersResponse = await eventService.getAllPapers();
-        const papersData = Array.isArray(papersResponse.papers) ? papersResponse.papers : papersResponse?.data?.papers || [];
+        const papersData = Array.isArray(papersResponse.papers)
+          ? papersResponse.papers
+          : papersResponse?.data?.papers || [];
         const sortedPapers = papersData
           .map((paper) => ({
             name: paper.eventName || paper.name,
@@ -96,7 +106,6 @@ const NavBarForDesktop = () => {
           }))
           .sort((a, b) => a.name.localeCompare(b.name));
         setPapers(sortedPapers);
-
       } catch (error) {
         console.error("Error fetching navbar data:", error);
       } finally {
@@ -127,7 +136,12 @@ const NavBarForDesktop = () => {
         <section className="space-y-1">
           {(!userDetails || !localStorage.getItem("token")) && (
             <button
-              onClick={() => window.open("https://www.youtube.com/watch?v=YeFJPRFhmCM", "_blank")}
+              onClick={() =>
+                window.open(
+                  "https://www.youtube.com/watch?v=YeFJPRFhmCM",
+                  "_blank",
+                )
+              }
               className="w-full px-4 py-3 mb-6 text-sm font-bold tracking-widest uppercase transition-all duration-300 bg-white text-black hover:bg-gray-200 rounded-lg shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)]"
             >
               How to Register
@@ -136,9 +150,21 @@ const NavBarForDesktop = () => {
 
           {[
             { href: "/", icon: <AiOutlineHome />, label: "Home" },
-            { href: "/portal/event", icon: <MdOutlineEmojiEvents />, label: "Events" },
-            { href: "/portal/workshop", icon: <GrWorkshop />, label: "Workshops" },
-            { href: "/portal/paper", icon: <HiOutlinePresentationChartBar />, label: "Paper Presentations" },
+            {
+              href: "/#features-section",
+              icon: <MdOutlineEmojiEvents />,
+              label: "Events",
+            },
+            {
+              href: "/#workshops-section",
+              icon: <GrWorkshop />,
+              label: "Workshops",
+            },
+            {
+              href: "/#paper-presentation-section",
+              icon: <HiOutlinePresentationChartBar />,
+              label: "Paper Presentations",
+            },
           ].map((item) => (
             <Link
               key={item.href}
@@ -159,11 +185,15 @@ const NavBarForDesktop = () => {
             </h3>
             <div className="space-y-4">
               <div>
-                <p className="px-4 py-1 text-xs font-bold text-white/90">Workshops</p>
+                <p className="px-4 py-1 text-xs font-bold text-white/90">
+                  Workshops
+                </p>
                 <WorkNav noMargin workshops={workshops} />
               </div>
               <div>
-                <p className="px-4 py-1 text-xs font-bold text-white/90">Research</p>
+                <p className="px-4 py-1 text-xs font-bold text-white/90">
+                  Research
+                </p>
                 <PaperNav noMargin papers={papers} />
               </div>
             </div>
@@ -184,10 +214,16 @@ const NavBarForDesktop = () => {
               </div>
 
               <div className="space-y-1">
-                <p className="px-4 py-1 text-xs font-bold text-white/90">Categories</p>
+                <p className="px-4 py-1 text-xs font-bold text-white/90">
+                  Categories
+                </p>
                 <div className="space-y-0.5">
                   <EventNav category="Coding" events={events} />
-                  <EventNav category="Science and Technology" noMargin events={events} />
+                  <EventNav
+                    category="Science and Technology"
+                    noMargin
+                    events={events}
+                  />
                   <EventNav category="Bot" events={events} />
                   <EventNav category="Quiz" events={events} />
                   <EventNav category="Core Engineering" events={events} />

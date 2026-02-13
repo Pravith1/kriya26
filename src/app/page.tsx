@@ -6,12 +6,16 @@ import Hero from "@/components/Hero";
 import CountDown from "@/components/Countdown";
 import Preloader from "@/components/ui/Preloader";
 
-const StatsSection = React.memo(dynamic(() => import("@/components/StatsSection")));
+const StatsSection = React.memo(
+  dynamic(() => import("@/components/StatsSection")),
+);
 const PrizePool = React.memo(dynamic(() => import("@/components/About")));
 const Flagship = React.memo(dynamic(() => import("@/components/Story")));
 const Events = React.memo(dynamic(() => import("@/components/Features")));
 const Workshops = React.memo(dynamic(() => import("@/components/Workshop")));
-const PaperPresentation = React.memo(dynamic(() => import("@/components/PaperPresentation")));
+const PaperPresentation = React.memo(
+  dynamic(() => import("@/components/PaperPresentation")),
+);
 const Sponsors = React.memo(dynamic(() => import("@/components/Sponsors")));
 const Team = React.memo(dynamic(() => import("@/components/Team")));
 const Faq = React.memo(dynamic(() => import("@/components/Faq")));
@@ -44,8 +48,8 @@ export default function Home() {
       )}
       <Navbar />
       <Hero preloaderComplete={!isLoading} />
-      <CountDown />
       <StatsSection />
+      <CountDown />
       <PrizePool preloaderComplete={!isLoading} />
       <Flagship />
       <Events />

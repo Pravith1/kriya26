@@ -179,9 +179,9 @@ const NavBarForMobile = () => {
 
             {[
               { href: "/", label: "Home", icon: <AiOutlineHome /> },
-              { href: "/portal/event", label: "Events", icon: <MdOutlineEmojiEvents /> },
-              { href: "/portal/workshop", label: "Workshops", icon: <GrWorkshop /> },
-              { href: "/portal/paper", label: "Paper Presentations", icon: <HiOutlinePresentationChartBar /> },
+              { href: "/#features-section", label: "Events", icon: <MdOutlineEmojiEvents /> },
+              { href: "/#workshops-section", label: "Workshops", icon: <GrWorkshop /> },
+              { href: "/#paper-presentation-section", label: "Paper Presentations", icon: <HiOutlinePresentationChartBar /> },
             ].map((item) => (
               <Link
                 key={item.href}
