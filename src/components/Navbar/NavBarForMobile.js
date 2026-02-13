@@ -130,7 +130,7 @@ const NavBarForMobile = () => {
         <div className="flex justify-center">
           <Link
             href={"/"}
-            className="w-[3.5rem] h-[2.25rem]"
+            className="w-14 h-9"
             style={{
               background: `url(/assets/Logo/Kriya25whitelogo.png)`,
               backgroundPosition: "center",
@@ -170,14 +170,14 @@ const NavBarForMobile = () => {
           <Link
             href="/"
             id="navElements"
-            className="w-full py-2 text-left text-white text-gray-600 hover:text-gray-300"
+            className="w-full py-2 text-left text-white hover:text-gray-300"
           >
             Home
           </Link>
           {token && userDetails ? (
             <Link
               href="/portal/profile"
-              className="w-full py-2 text-left text-white text-gray-600 hover:text-gray-300"
+              className="w-full py-2 text-left text-white hover:text-gray-300"
             >
               Dashboard
             </Link>
@@ -190,29 +190,29 @@ const NavBarForMobile = () => {
                   "_blank"
                 )
               }
-              className="w-full py-2 text-left text-white text-gray-600 hover:text-gray-300"
+              className="w-full py-2 text-left text-white hover:text-gray-300"
             >
               How to Register
             </button>
           )}
           <Link
-            href="/#section3"
+            href="/portal/event"
             id="navElements"
-            className="w-full py-2 text-left text-white text-gray-600 hover:text-gray-300"
+            className="w-full py-2 text-left text-white hover:text-gray-300"
           >
             Events
           </Link>
           <Link
-            href="/#section5"
+            href="/portal/workshop"
             id="navElements"
-            className="w-full py-2 text-left text-white text-gray-600 hover:text-gray-300"
+            className="w-full py-2 text-left text-white hover:text-gray-300"
           >
             Workshops
           </Link>
           <Link
-            href="/#section4"
+            href="/portal/paper"
             id="navElements"
-            className="w-full py-2 text-left text-white text-gray-600 hover:text-gray-300"
+            className="w-full py-2 text-left text-white hover:text-gray-300"
           >
             Paper Presentations
           </Link>

@@ -132,7 +132,7 @@ const Features = () => {
         </BentoTilt>
 
         {/* Mobile: flex-col layout, Desktop: grid layout */}
-        <div className="flex flex-col gap-3 md:grid md:h-[60vh] md:w-full md:grid-cols-2 md:grid-rows-2 md:gap-7 lg:h-[100vh] xl:h-[110vh]">
+        <div className="flex flex-col gap-3 md:grid md:h-[60vh] md:w-full md:grid-cols-2 md:grid-rows-2 md:gap-7 lg:h-screen xl:h-[110vh]">
           <BentoTilt
             className="bento-tilt_1 h-60 md:h-auto md:row-span-1 md:col-span-1"
             onClick={() => handleCategoryClick('coding')}
@@ -173,7 +173,7 @@ const Features = () => {
           </BentoTilt>
 
           <BentoTilt
-            className="bento-tilt_1 h-60 md:h-auto md:row-span-2 md:col-start-2 md:row-start-1 md:col-span-1 md:row-start-1 md:col-start-2"
+            className="bento-tilt_1 h-60 md:h-auto md:row-span-2 md:col-start-2 md:row-start-1 md:col-span-1"
             onClick={() => handleCategoryClick('fashion')}
           >
             <BentoCard

@@ -149,14 +149,14 @@ const NavBarForDesktop = () => {
             <p className="">Events</p>
           </Link>
           <Link
-            href="/#section5"
+            href="/portal/workshop"
             className="flex items-center w-full py-2 space-x-4 text-left text-white  group hover:text-gray-300"
           >
             <GrWorkshop className="text-lg opacity-70 group-hover:opacity-100" />
             <p className="">Workshops</p>
           </Link>
           <Link
-            href="/#section4"
+            href="/portal/paper"
             className="flex items-center w-full py-2 space-x-4 text-left text-white  hover:text-gray-300"
           >
             <HiOutlinePresentationChartBar className="text-lg" />
