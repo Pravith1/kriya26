@@ -77,6 +77,17 @@ const placeNow = (el, slot, skew, totalCards) =>
     pointerEvents: slot.zIndex === totalCards ? 'auto' : 'none'
   });
 
+// Helper to format time (12hr with AM/PM)
+const formatTime = (timeString) => {
+  if (!timeString) return "";
+  const [hourStr, minuteStr] = timeString.split(':');
+  let hour = parseInt(hourStr);
+  const ampm = hour >= 12 ? 'PM' : 'AM';
+  hour = hour % 12;
+  hour = hour ? hour : 12; // the hour '0' should be '12'
+  return `${hour}:${minuteStr} ${ampm}`;
+};
+
 const FloatingImage = () => {
   const router = useRouter();
   const [events, setEvents] = useState([]);
@@ -106,13 +117,21 @@ const FloatingImage = () => {
         const processedEvents = responses.map((res, index) => {
           const event = res.event;
           const { day, month, year } = formatEventDate(event.date);
+
+          // Format start and end times
+          const startTime = event.startTime ? formatTime(event.startTime) : "";
+          const endTime = event.endTime ? formatTime(event.endTime) : "";
+          const timeDisplay = (startTime && endTime)
+            ? `${startTime} - ${endTime}`
+            : (event.timing || "TBD");
+
           return {
             id: event.eventId,
             image: STATIC_IMAGES[index % STATIC_IMAGES.length],
             alt: event.eventName,
             title: event.eventName,
             location: event.hall,
-            time: event.timing || "TBD",
+            time: timeDisplay,
             day,
             month,
             year,
@@ -413,7 +432,7 @@ const FloatingImage = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="font-zentry animated-word-static text-4xl md:text-5xl lg:text-6xl uppercase tracking-wider mb-8 font-black text-black flex items-center gap-2"
           >
-            FLAGSHIP EVENTS <span className="text-blue-500 text-base md:text-lg lg:text-xl font-normal tracking-normal">( KRIYA 2026 )</span>
+            FLAGSHIP EVENTS <span className="text-blue-500 text-base md:text-lg lg:text-xl font-normal tracking-normal"></span>
           </motion.p>
         </div>
 
@@ -455,7 +474,7 @@ const FloatingImage = () => {
                   onClick={() => router.push(`/portal/event/${slide.id}`)}
                 >
                   {/* Top Image Section */}
-                  <div className="h-[65%] w-full relative">
+                  <div className="h-[55%] md:h-[65%] w-full relative">
                     <img
                       src={slide.image}
                       alt={slide.alt}
@@ -465,20 +484,20 @@ const FloatingImage = () => {
 
                   {/* Bottom Info Section - Dynamic Color Background */}
                   <div
-                    className="h-[35%] w-full p-4 md:p-6 lg:p-8 flex items-start justify-between text-black relative"
+                    className="h-[45%] md:h-[35%] w-full p-4 md:p-6 lg:p-8 flex items-start justify-between relative"
                     style={{ backgroundColor: slide.color }}
                   >
-                    <div className="flex flex-col h-full justify-between z-10">
+                    <div className="flex flex-col h-full justify-between z-10 w-[65%]">
                       <div>
-                        <h2 className="text-2xl md:text-3xl lg:text-4xl font-extrabold uppercase leading-tight mb-2 tracking-wide font-zentry">{slide.title}</h2>
-                        <p className="font-semibold text-xs md:text-sm uppercase tracking-wider opacity-80">{slide.location} | {slide.time}</p>
+                        <h2 className="special-font text-2xl sm:text-3xl lg:text-5xl font-black uppercase leading-tight mb-1 sm:mb-2 tracking-wide text-black break-words"><b>{slide.title}</b></h2>
+                        <p className="text-xs sm:text-sm lg:text-base uppercase tracking-wider text-black font-bold opacity-90">{slide.location} | {slide.time}</p>
                       </div>
                     </div>
 
-                    <div className="flex flex-col items-end z-10">
-                      <span className="text-xs md:text-sm font-bold uppercase mb-0 tracking-wider">({slide.month})</span>
-                      <span className="text-xs md:text-sm font-bold uppercase mb-1">{slide.year}</span>
-                      <span className="text-4xl md:text-5xl lg:text-6xl font-black leading-none">{slide.day}</span>
+                    <div className="flex flex-col items-end z-10 text-black w-[35%]">
+                      <span className="text-xs sm:text-sm lg:text-base font-bold uppercase mb-0 tracking-wider">({slide.month})</span>
+                      <span className="text-xs sm:text-sm lg:text-base font-bold uppercase mb-1">{slide.year}</span>
+                      <span className="text-4xl sm:text-5xl lg:text-7xl font-black leading-none">{slide.day}</span>
                     </div>
                   </div>
                 </div>

@@ -8,8 +8,8 @@ const Home = () => {
 
   const eventDetails = {
     title: 'Kriya 2026 - Technical Symposium',
-    startTime: '2026-03-14T09:00:00',
-    endTime: '2026-03-16T17:00:00',
+    startTime: '2026-03-13T09:00:00',
+    endTime: '2026-03-15T17:00:00',
     location: 'PSG College of Technology, Coimbatore',
     description: 'Join us at the forefront of technological advancements and gain valuable insights at our upcoming technical symposium Kriya 2026.',
   };

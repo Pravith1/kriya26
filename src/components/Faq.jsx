@@ -1,5 +1,6 @@
 "use client"
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import "@/components/FAQ/faq.css";
 
 const faqData = {
@@ -16,7 +17,7 @@ const faqData = {
     },
     {
       question: "What are the dates for KRIYA 2026?",
-      answer: "KRIYA 2026 will take place from 14th March to 16th March 2026.",
+      answer: "KRIYA 2026 will take place from 13th March to 15th March 2026.",
     },
     {
       question: "How can I stay updated about the event?",
@@ -43,7 +44,7 @@ const faqData = {
     {
       question: "What is the last date for registration?",
       answer:
-        "Registrations are open until event slots are filled. On-spot registrations may also be available if slots remain.",
+        "Registrations are open until event slots are filled.",
     },
   ],
   Workshops: [
@@ -132,55 +133,116 @@ const faqData = {
 export default function FAQPage() {
   const [selectedCategory, setSelectedCategory] = useState("General");
   const [openIndex, setOpenIndex] = useState(null);
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+  };
+
   return (
     <div
-      className="min-h-20vh bg-black text-[#EBECF3] flex flex-col items-start px-6 py-20"
+      className="min-h-20vh bg-black text-[#EBECF3] flex flex-col items-center px-6 py-20"
       id="section8"
     >
-      <h1 className="font-zentry animated-word-static text-4xl md:text-5xl lg:text-6xl uppercase tracking-wider mb-4 font-black text-center w-full">
-        FREQUENTLY ASKED QUESTIONS
-      </h1>
-      <p className="text-gray-400 font-poppins text-sm mb-2 text-center w-full">
-        Get the answers you need to navigate our platform with confidence.
-      </p>
+      <div className="w-full lg:w-[60%] flex flex-col items-center">
+        <motion.h1
+          initial={{ opacity: 0, y: -20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="font-zentry animated-word-static text-4xl md:text-5xl lg:text-6xl uppercase tracking-wider mb-4 font-black text-center w-full"
+        >
+          FREQUENTLY ASKED QUESTIONS
+        </motion.h1>
+        <motion.p
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="text-gray-400 font-poppins text-sm mb-2 text-center w-full"
+        >
+          Get the answers you need to navigate our platform with confidence.
+        </motion.p>
 
-      {/* Category Buttons */}
-      <div className="w-full overflow-x-auto no-scrollbar px-0">
-        <div className="flex gap-4 mb-6 text-xs sm:text-m justify-start md:justify-center mt-5 whitespace-nowrap w-max md:w-full mx-auto">
-          {Object.keys(faqData).map((category) => (
-            <button
-              key={category}
-              className={`px-3 py-1 sm:px-4 sm:py-2 text-xs sm:text-base rounded-full border border-[#3E4250] ${selectedCategory === category ? "bg-blue-500 text-black" : ""
-                }`}
-              onClick={() => setSelectedCategory(category)}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* FAQ List */}
-      <div className="w-full min-w-100vw space-y-4 mt-3">
-        {faqData[selectedCategory].map((faq, index) => (
-          <div
-            key={index}
-            className="text-left border border-[#3E4250] rounded-2xl w-full"
+        {/* Category Buttons */}
+        <div className="w-full overflow-x-auto no-scrollbar px-0">
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            className="flex gap-4 mb-6 text-xs sm:text-m justify-start md:justify-center mt-5 whitespace-nowrap w-max md:w-full mx-auto"
           >
-            <button
-              className="w-full text-left px-6 py-4 flex justify-between items-center"
-              onClick={() => setOpenIndex(openIndex === index ? null : index)}
+            {Object.keys(faqData).map((category) => (
+              <motion.button
+                key={category}
+                variants={itemVariants}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className={`px-3 py-1 sm:px-4 sm:py-2 text-xs sm:text-base rounded-full border border-[#3E4250] ${selectedCategory === category ? "bg-blue-500 text-black" : ""
+                  }`}
+                onClick={() => setSelectedCategory(category)}
+              >
+                {category}
+              </motion.button>
+            ))}
+          </motion.div>
+        </div>
+
+        {/* FAQ List */}
+        <div className="w-full space-y-4 mt-3">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={selectedCategory}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-4"
             >
-              <span className="text-lg text-left">{faq.question}</span>
-              <span className="text-xl">{openIndex === index ? "−" : "+"}</span>
-            </button>
-            {openIndex === index && (
-              <div className="px-6 pb-4 text-g font-poppins ray-300 text-left">
-                {faq.answer}
-              </div>
-            )}
-          </div>
-        ))}
+              {faqData[selectedCategory].map((faq, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="text-left border border-[#3E4250] rounded-2xl w-full overflow-hidden"
+                >
+                  <button
+                    className="w-full text-left px-6 py-4 flex justify-between items-center"
+                    onClick={() => setOpenIndex(openIndex === index ? null : index)}
+                  >
+                    <span className="text-lg text-left">{faq.question}</span>
+                    <span className="text-xl">{openIndex === index ? "−" : "+"}</span>
+                  </button>
+                  <AnimatePresence>
+                    {openIndex === index && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="px-6 text-gray-300 font-poppins text-left"
+                      >
+                        <div className="pb-4">{faq.answer}</div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              ))}
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </div>
     </div>
   );

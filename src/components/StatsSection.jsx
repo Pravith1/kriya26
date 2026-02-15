@@ -69,7 +69,7 @@ const StatsSection = () => {
                 <h2 className="special-font text-[3.5rem] xs:text-[4rem] sm:text-[7rem] md:text-[8rem] lg:text-[10rem] font-black leading-none text-white drop-shadow-[0_0_40px_rgba(255,255,255,0.2)]">
                   <AnimatedCounter value={numericValue} suffix={suffix} />
                 </h2>
-                <p className="font-zentry text-sm sm:text-2xl md:text-3xl font-bold uppercase tracking-widest text-white/80 mt-2">
+                <p className="font-zentry text-sm sm:text-2xl md:text-3xl font-bold uppercase tracking-widest text-blue-500 mt-2">
                   {stat.label}
                 </p>
               </div>

@@ -21,33 +21,47 @@ const DateSlider = () => {
     [13, 14, 15].includes(item.date)
   );
 
-  const dateVariant = {
-    hidden: {
-      opacity: 0,
-    },
+  const containerVariant = {
+    hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        duration: 0.5,
-        ease: "easeInOut",
-      },
-    },
+        staggerChildren: 0.1,
+        delayChildren: 0.2
+      }
+    }
+  };
+
+  const itemVariant = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 100
+      }
+    }
   };
 
   return (
-    <motion.div
-      variants={dateVariant}
-      initial="visible"
-      animate="visible"
+    <div
       className="relative top-0 w-full text-white z-10 min-h-[80px] py-4"
     >
       {/* Mobile View - Only Highlighted Dates */}
       <div className="w-full md:hidden">
-        <div className={`flex items-center justify-evenly w-full`}>
+        <motion.div
+          className={`flex items-center justify-evenly w-full`}
+          variants={containerVariant}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+        >
           {highlightedDates.map((item) => (
-            <div
+            <motion.div
               key={`${item.date}-${item.day}`}
               className="flex items-center justify-center p-1"
+              variants={itemVariant}
             >
               <div className="flex flex-col items-center justify-center">
                 <div className="relative">
@@ -59,25 +73,32 @@ const DateSlider = () => {
                   </span>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
 
       {/* Desktop View - All Dates */}
       <div className="hidden w-full md:flex">
-        <div className={`flex justify-evenly w-full items-center`}>
+        <motion.div
+          className={`flex justify-evenly w-full items-center`}
+          variants={containerVariant}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+        >
           {dates.map((item) => (
-            <div
+            <motion.div
               key={`${item.date}-${item.day}`}
               className="flex items-center justify-center"
+              variants={itemVariant}
             >
               <div className="flex flex-col items-center justify-center">
                 <div className="relative">
                   <span
                     className={`${[13, 14, 15].includes(item.date)
                       ? "text-5xl lg:text-6xl xl:text-7xl font-bold"
-                      : "text-4xl lg:text-5xl xl:text-6xl font-bold hover:opacity-100 transition-opacity"
+                      : "text-4xl lg:text-5xl xl:text-6xl font-bold hover:opacity-100 transition-opacity opacity-50"
                       }`}
                     style={{
                       color: [13, 14, 15].includes(item.date) ? '#3B82F6' : '#D9D9D9'
@@ -88,7 +109,7 @@ const DateSlider = () => {
                   <span
                     className={`absolute -top-0 left-full ${[13, 14, 15].includes(item.date)
                       ? "text-xl font-bold"
-                      : "text-sm font-bold hover:opacity-100 transition-opacity"
+                      : "text-sm font-bold hover:opacity-100 transition-opacity opacity-50"
                       }`}
                     style={{
                       color: [13, 14, 15].includes(item.date) ? '#FFFFFF' : '#D9D9D9'
@@ -98,11 +119,11 @@ const DateSlider = () => {
                   </span>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 

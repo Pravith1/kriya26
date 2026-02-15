@@ -44,26 +44,21 @@ const PaperPresentationItemDesktop = ({
 
       {/* Title */}
       <p
-        className={`font-semibold font-poppins absolute w-full origin-top-left transition-all duration-300 z-30 ${isHovered
-          ? `rotate-0 ${data.eventName.length > 60
+        className={`font-semibold font-poppins absolute w-[calc(100%-3rem)] origin-top-left transition-all duration-300 z-30 break-words leading-tight ${isHovered
+          ? `rotate-0 opacity-100 ${data.eventName.length > 60
             ? "text-sm"
             : data.eventName.length > 30
               ? "text-lg"
               : "text-xl"
-          } text-white bottom-0 left-0 translate-x-6 -translate-y-6 lg:-translate-y-10`
-          : `-rotate-90 whitespace-nowrap ${data.eventName.length > 50
-            ? "text-xs md:text-2xs"
-            : data.eventName.length > 30
-              ? "text-sm"
-              : "text-2xl"
-          } text-white/60 bottom-0 right-2 lg:right-4 translate-x-[calc(35vw/6)]`
-          } uppercase drop-shadow-lg`}
+          } text-white bottom-16 left-6`
+          : `opacity-0 bottom-0 left-0`
+          } uppercase drop-shadow-lg pointer-events-none`}
       >
         {data.eventName}
       </p>
 
       {/* Explore indicator on hover */}
-      <div className={`absolute bottom-4 right-4 z-30 px-3 py-1.5 
+      <div className={`absolute bottom-6 left-6 z-30 px-3 py-1.5 
         bg-transparent border border-white/50 rounded-lg text-white text-sm font-medium
         transition-all duration-300 hover:bg-white hover:text-black
         ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}

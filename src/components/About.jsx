@@ -104,7 +104,7 @@ const About = ({ preloaderComplete = true }) => {
           <VantaBackground>
             <div className="prize-pool-text bg-black/50 xl:bg-transparent w-full absolute inset-0 flex flex-col justify-center items-center text-center">
               <AnimatedTitle
-                title="<b>P</b>rize <b>P</b>ool <br /> 6,00,000"
+                title="<b>P</b>rize <b>P</b>ool <br /> &#8377;6,00,000"
                 containerClass="special-font !text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.5)]"
               />
             </div>

@@ -1,10 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { eventService } from "../services/eventservice";
 import PaperPresentationItemDesktop from './paper_presentation/PaperPresentationItemDesktop';
 import PaperPresentationItemMobile from './paper_presentation/PaperPresentationItemMobile';
 import AnimatedTitle from './AnimatedTitle';
+import { HiChevronLeft, HiChevronRight } from "react-icons/hi2";
+
 
 const STATIC_IMAGES = [
     "/img/papers/pp1.png",
@@ -19,11 +22,50 @@ const STATIC_IMAGES = [
     "/img/papers/pp10.png",
 ];
 
+const slideVariants = {
+    enter: (direction) => ({
+        x: direction > 0 ? 300 : -300,
+        opacity: 0,
+        scale: 0.8,
+        rotateY: direction > 0 ? 45 : -45,
+    }),
+    center: {
+        x: 0,
+        opacity: 1,
+        scale: 1,
+        rotateY: 0,
+        zIndex: 1,
+        transition: {
+            zIndex: { delay: 0.1 }, // Let it come to front
+            type: "spring",
+            stiffness: 300,
+            damping: 30,
+        },
+    },
+    exit: (direction) => ({
+        x: direction < 0 ? 300 : -300,
+        opacity: 0,
+        scale: 0.8,
+        rotateY: direction < 0 ? 45 : -45,
+        zIndex: 0,
+        transition: {
+            zIndex: { delay: 0 },
+            duration: 0.2
+        }
+    }),
+};
+
 const PaperPresentation = () => {
     const [onMouseHoverIndex, setOnMouseHoverIndex] = useState(0);
     const [papers, setPapers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    // Mobile Carousel State
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [direction, setDirection] = useState(0);
+    const [touchStart, setTouchStart] = useState(null);
+    const [touchEnd, setTouchEnd] = useState(null);
 
     useEffect(() => {
         const loadPapers = async () => {
@@ -66,6 +108,53 @@ const PaperPresentation = () => {
         };
         loadPapers();
     }, []);
+
+    // Auto-play state
+    const [isPaused, setIsPaused] = useState(false);
+
+    useEffect(() => {
+        if (isPaused || papers.length === 0) return;
+        const interval = setInterval(() => {
+            paginate(1);
+        }, 3000);
+        return () => clearInterval(interval);
+    }, [currentIndex, isPaused, papers.length]);
+
+    // Carousel Navigation
+    const paginate = (newDirection) => {
+        setDirection(newDirection);
+        setCurrentIndex((prevIndex) => {
+            let nextIndex = prevIndex + newDirection;
+            if (nextIndex < 0) nextIndex = papers.length - 1;
+            if (nextIndex >= papers.length) nextIndex = 0;
+            return nextIndex;
+        });
+    };
+
+    const handleTouchStart = (e) => {
+        setIsPaused(true);
+        setTouchEnd(null);
+        setTouchStart(e.targetTouches[0].clientX);
+    };
+
+    const handleTouchMove = (e) => {
+        setTouchEnd(e.targetTouches[0].clientX);
+    };
+
+    const handleTouchEnd = () => {
+        setIsPaused(false);
+        if (!touchStart || !touchEnd) return;
+        const distance = touchStart - touchEnd;
+        const isLeftSwipe = distance > 50;
+        const isRightSwipe = distance < -50;
+
+        if (isLeftSwipe) {
+            paginate(1);
+        } else if (isRightSwipe) {
+            paginate(-1);
+        }
+    };
+
 
     if (loading) {
         return (
@@ -124,42 +213,65 @@ const PaperPresentation = () => {
 
                 <div className="w-full lg:w-[35%] xl:w-[30%] text-center lg:text-left flex flex-col justify-center">
                     <AnimatedTitle
-                        title="<b>R</b>esearch <br /> <b>P</b>aper <br /> <b>P</b>resentations"
+                        title="<b>P</b>aper <br /> <b>P</b>resentations"
                         containerClass="special-font text-black drop-shadow-[0_0_30px_rgba(255,255,255,0.4)]"
                     />
-                    <p className="special-font text-3xl md:text-4xl lg:text-5xl font-black uppercase tracking-wider mt-4  text-blue-400 text-center ">
-                        <b>( K</b><b>r</b><b>iya 2026 )</b>
-                    </p>
                 </div>
             </div>
 
             {/* Mobile Layout */}
             <div className="relative z-10 w-full mx-auto flex lg:hidden flex-col h-screen">
                 {/* Header Section */}
-                <div className="w-full text-center pt-8 pb-6 px-4 shrink-0">
+                <div className="w-full text-center pt-20 pb-4 px-4 shrink-0">
                     <AnimatedTitle
-                        title="<b>R</b>esearch <b>P</b>aper <br /> <b>P</b>resentations"
+                        title="<b>P</b>aper <br /> <b>P</b>resentations"
                         containerClass="special-font text-black drop-shadow-[0_0_30px_rgba(255,255,255,0.4)] text-3xl md:text-4xl"
                     />
-                    <p className="special-font font-black uppercase tracking-wider mt-3 text-2xl" style={{ color: '#9146FF' }}>
-                        <b>(</b><b>K</b><b>riya 2026</b><b>)</b>
-                    </p>
                 </div>
 
-                {/* Cards Section - Full Height */}
-                <div className="flex-1 w-full px-4 pb-20 min-h-0">
-                    <div className="flex gap-4 overflow-x-auto scrollbar-hide h-full items-center"
-                        style={{
-                            scrollbarWidth: 'none',
-                            msOverflowStyle: 'none',
-                        }}>
-                        {papers.map((data, index) => (
-                            <PaperPresentationItemMobile
-                                key={index}
-                                data={data}
-                            />
-                        ))}
+                {/* Cards Section - Carousel */}
+                <div
+                    className="flex-1 w-full px-4 pb-20 min-h-0 flex items-center justify-center relative overflow-hidden" // Added overflow-hidden to contain slides
+                    onTouchStart={handleTouchStart}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd}
+                >
+                    <div className="w-full h-[60vh] max-h-[500px] relative perspective-1000 flex items-center justify-center"> {/* Added flex center */}
+                        <AnimatePresence initial={false} custom={direction}>
+                            <motion.div
+                                key={currentIndex}
+                                custom={direction}
+                                variants={slideVariants}
+                                initial="enter"
+                                animate="center"
+                                exit="exit"
+                                className="absolute w-[85%] h-full"
+                                style={{
+                                    left: "7.5%",
+                                    right: "7.5%"
+                                }}
+                            >
+                                <PaperPresentationItemMobile
+                                    data={papers[currentIndex]}
+                                />
+                            </motion.div>
+                        </AnimatePresence>
                     </div>
+                </div>
+
+                {/* Pagination Dots */}
+                <div className="w-full flex justify-center gap-2 pb-8 z-20 shrink-0">
+                    {papers.map((_, idx) => (
+                        <div
+                            key={idx}
+                            onClick={() => {
+                                setDirection(idx > currentIndex ? 1 : -1);
+                                setCurrentIndex(idx);
+                            }}
+                            className={`w-2 h-2 rounded-full transition-all duration-300 cursor-pointer ${idx === currentIndex ? "bg-black w-4" : "bg-gray-400 hover:bg-gray-600"
+                                }`}
+                        />
+                    ))}
                 </div>
             </div>
 

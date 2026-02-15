@@ -127,7 +127,7 @@ const Hero = ({ preloaderComplete = true }) => {
             <h3 className="special-font text-white text-lg font-zentry tracking-wider">
               <b>PSG COLLEGE OF TECHNOLOGY</b>
             </h3>
-            <h3 className="special-font text-blue-400 text-lg font-zentry tracking-wider">
+            <h3 className="special-font text-blue-500 text-lg font-zentry tracking-wider">
               <b>STUDENTS UNION</b>
             </h3>
             <h3 className="special-font text-white text-lg font-zentry tracking-wider">
@@ -152,7 +152,7 @@ const Hero = ({ preloaderComplete = true }) => {
               <span className="">Cl<b>a</b>sh <b>of</b></span>
             </h1>
             <h2 className="special-font text-center text-xl font-zentry font-thin uppercase text-white bg-clip-text text-transparent">
-              <span className="bg-black/50 text-blue-400 p-1 rounded-md">te<b>c</b>h<b>n</b>o t<b>a</b>lents</span>
+              <span className="bg-black/50 text-blue-500 p-1 rounded-md">te<b>c</b>h<b>n</b>o t<b>a</b>lents</span>
             </h2>
           </div>
 
@@ -162,11 +162,11 @@ const Hero = ({ preloaderComplete = true }) => {
               <h2 className="special-font font-zentry font-thin uppercase text-white bg-clip-text text-transparent">
                 <span className="">Ma<b>r</b>c<b>h</b></span>
               </h2>
-              <span className="text-white">13</span>
-              <span className="text-blue-400">,</span>
-              <span className="text-white">14</span>
-              <span className="text-blue-400">,</span>
-              <span className="text-white">15</span>
+              <span className="text-blue-500">13</span>
+              <span className="text-white">,</span>
+              <span className="text-blue-500">14</span>
+              <span className="text-white">,</span>
+              <span className="text-blue-500">15</span>
               <span>  </span>
               <span className="text-white">2026</span>
             </div>
@@ -225,7 +225,7 @@ const Hero = ({ preloaderComplete = true }) => {
           <h3 className="special-font text-white text-3xl font-zentry tracking-wider">
             <b>PSG COLLEGE OF TECHNOLOGY</b>
           </h3>
-          <h3 className="special-font text-blue-400 text-3xl font-zentry tracking-wider">
+          <h3 className="special-font text-blue-500 text-3xl font-zentry tracking-wider">
             <b>STUDENTS UNION</b>
           </h3>
           <h3 className="special-font text-white text-3xl font-zentry tracking-wider">
@@ -282,20 +282,20 @@ const Hero = ({ preloaderComplete = true }) => {
             {/* Title - Moved Here & Smaller */}
             <div className="flex flex-col items-center mb-2">
               <h1 className="special-font text-center text-4xl lg:text-5xl font-zentry font-thin uppercase text-white tracking-wide">
-                the gl<b>o</b>bal cl<b>a</b>sh <b>o</b>f <span className="bg-black/50 p-1 rounded-xl text-blue-400">te<b>c</b>h<b>n</b>o t<b>a</b>lents</span>
+                the gl<b>o</b>bal cl<b>a</b>sh <b>o</b>f <span className="bg-black/50 p-1 rounded-xl text-blue-500">te<b>c</b>h<b>n</b>o t<b>a</b>lents</span>
               </h1>
             </div>
 
             {/* Date - Bigger */}
-            <div className="flex items-center justify-center gap-2 text-7xl xl:text-8xl text-white font-zentry">
+            <div className="flex items-center justify-center gap-2 text-7xl xl:text-8xl text-white font-zentry bg-black/50 px-4 py-2 rounded-xl">
               <h2 className="special-font font-zentry font-thin uppercase text-white bg-clip-text text-transparent">
                 <span className="p-2"><b>Ma<b><b>r</b></b>ch</b></span>
               </h2>
-              <span>13</span>
-              <span className="text-blue-400">,</span>
-              <span>14</span>
-              <span className="text-blue-400">,</span>
-              <span>15</span>
+              <span className="text-blue-500">13</span>
+              <span className="text-white">,</span>
+              <span className="text-blue-500">14</span>
+              <span className="text-white">,</span>
+              <span className="text-blue-500">15</span>
               <span>   </span>
               <span>2026</span>
             </div>
