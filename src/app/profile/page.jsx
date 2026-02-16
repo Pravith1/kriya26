@@ -233,29 +233,69 @@ export default function ProfilePage() {
                     </div>
                 ) : (
                     <div className="max-w-4xl mx-auto space-y-6 relative z-10">
-                        {/* Notification Banner */}
-                        <div className="bg-blue-600/20 border border-blue-400 p-4 rounded-xl text-center backdrop-blur-md">
-                            <p className="font-general font-medium text-white tracking-wide drop-shadow-md">
-                                You will be notified once registrations opens
-                            </p>
+                        {/* Tab Navigation */}
+                        <div className="flex items-center border-b border-white/10 mb-2 overflow-x-auto scrollbar-hide">
+                            <div className="flex gap-1 min-w-max">
+                                <button
+                                    onClick={() => setActiveTab("profile")}
+                                    className={`px-6 py-3 font-general text-sm uppercase tracking-wider transition-colors ${activeTab === "profile"
+                                        ? "text-white border-b-2 border-blue-500"
+                                        : "text-gray-500 hover:text-gray-300"
+                                        }`}
+                                >
+                                    Profile
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab("ambassador")}
+                                    className={`px-6 py-3 font-general text-sm uppercase tracking-wider transition-colors ${activeTab === "ambassador"
+                                        ? "text-white border-b-2 border-blue-500"
+                                        : "text-gray-500 hover:text-gray-300"
+                                        }`}
+                                >
+                                    Ambassador
+                                </button>
+                            </div>
                         </div>
 
-                        {/* Row 1: Profile Header (Full Width) */}
-                        <section>
-                            <ProfileHeader
-                                user={userData}
-                                onLogout={handleLogout}
-                                isLoggingOut={isLoggingOut}
-                                onProfileUpdate={handleProfileUpdate}
-                            />
-                        </section>
+                        {activeTab === "profile" && (
+                            <>
+                                {/* Notification Banner */}
+                                <div className="bg-blue-600/20 border border-blue-400 p-4 rounded-xl text-center backdrop-blur-md">
+                                    <p className="font-general font-medium text-white tracking-wide drop-shadow-md">
+                                        You will be notified once registrations opens
+                                    </p>
+                                </div>
 
-                        {/* Row 3: QR Code Section (Left) */}
-                        <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                            <div className="lg:col-span-12">
-                                <QRCodeSection ticketId={userData.kriyaId} />
-                            </div>
-                        </section>
+                                {/* Row 1: Profile Header (Full Width) */}
+                                <section>
+                                    <ProfileHeader
+                                        user={userData}
+                                        onLogout={handleLogout}
+                                        isLoggingOut={isLoggingOut}
+                                        onProfileUpdate={handleProfileUpdate}
+                                    />
+                                </section>
+
+                                {/* Row 3: QR Code Section (Left) */}
+                                <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                                    <div className="lg:col-span-12">
+                                        <QRCodeSection ticketId={userData.kriyaId} />
+                                    </div>
+                                </section>
+                            </>
+                        )}
+
+                        {activeTab === "ambassador" && (
+                            <section className="min-h-[400px] flex items-center justify-center border border-white/10 rounded-xl bg-white/5 backdrop-blur-md p-8">
+                                <div className="text-center max-w-lg">
+                                    <h2 className="font-zentry text-4xl text-white uppercase mb-4">Campus Ambassador</h2>
+                                    <p className="font-circular-web text-gray-300 text-lg leading-relaxed mb-6">
+                                        Represent Kriya on your campus. Get your unique referral code, bring your crew to register & pay — and <span className="text-blue-400 font-bold">the more they join, the bigger your rewards</span>.
+                                    </p>
+                                    <p className="font-general text-sm uppercase tracking-widest text-gray-500">Coming Soon</p>
+                                </div>
+                            </section>
+                        )}
                     </div>
                 )}
             </div>
